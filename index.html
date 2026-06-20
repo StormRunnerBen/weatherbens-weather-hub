@@ -189,6 +189,43 @@
   .location-btn:hover { opacity: 0.85; }
   .location-btn:disabled { opacity: 0.5; cursor: wait; }
 
+  /* ── Favorites chip row ── */
+  .favorites-row {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+  .fav-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 0.76rem;
+    padding: 0.3rem 0.55rem 0.3rem 0.65rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .fav-chip:hover { border-color: var(--electric); color: var(--text); }
+  .fav-chip.active {
+    border-color: var(--electric);
+    background: rgba(245,255,61,0.08);
+    color: var(--text);
+  }
+  .fav-chip-star { color: var(--electric); font-size: 0.78rem; }
+  .fav-chip-remove {
+    opacity: 0.5;
+    font-size: 0.68rem;
+    margin-left: 0.15rem;
+    padding: 0 2px;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .fav-chip-remove:hover { opacity: 1; color: var(--danger); }
+
   /* ── "Or" divider + Use My Location ── */
   .location-divider {
     display: flex;
@@ -250,6 +287,19 @@
     padding: 0;
   }
   .location-reset:hover { color: var(--electric); }
+
+  .fav-toggle {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-size: 0.74rem;
+    font-family: var(--sans);
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .fav-toggle:hover { color: var(--electric); }
+  .fav-toggle.saved { color: var(--electric); text-decoration: none; }
 
   /* ── Locked state (no location yet) ── */
   .locked-state {
@@ -574,6 +624,46 @@
     padding: 1rem 1.1rem;
     backdrop-filter: blur(8px);
   }
+  .cond-card-temp {
+    grid-column: span 2;
+  }
+  @media (max-width: 600px) {
+    .cond-card-temp { grid-column: span 2; }
+  }
+  .temp-trend-wrap {
+    margin-top: 0.6rem;
+  }
+  .temp-trend-svg {
+    width: 100%;
+    height: 44px;
+    display: block;
+    overflow: visible;
+  }
+  .temp-trend-line {
+    fill: none;
+    stroke: var(--electric);
+    stroke-width: 1.75;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0.9;
+  }
+  .temp-trend-fill {
+    fill: var(--electric);
+    opacity: 0.08;
+  }
+  .temp-trend-now-dot {
+    fill: var(--electric);
+    filter: drop-shadow(0 0 3px rgba(245,255,61,0.7));
+  }
+  .temp-trend-day-tick {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .temp-trend-label {
+    font-family: var(--mono);
+    font-size: 5.5px;
+    fill: var(--text-muted);
+  }
   .cond-label {
     font-size: 0.72rem;
     color: var(--text-muted);
@@ -616,7 +706,7 @@
     display: flex;
     gap: 0.6rem;
     overflow-x: auto;
-    padding-bottom: 0.5rem;
+    padding: 1.3rem 0 0.5rem;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
@@ -638,6 +728,37 @@
   .hour-temp { font-family: var(--mono); font-size: 0.95rem; font-weight: 500; }
   .hour-rain { font-size: 0.68rem; color: var(--electric); margin-top: 0.15rem; }
   .hour-rain.zero { color: var(--text-muted); opacity: 0.5; }
+
+  .hour-day-divider {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1px;
+    position: relative;
+  }
+  .hour-day-divider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .hour-day-divider span {
+    position: absolute;
+    top: -1.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+    background: var(--sky);
+    padding: 0 6px;
+  }
 
   /* ── 24hr Precipitation History Chart ── */
   .precip-history-card {
@@ -851,6 +972,7 @@
       <input type="text" id="location-input" class="location-input" placeholder="Enter a US city and state (e.g. Nashville, TN)" autocomplete="off" />
       <button class="location-btn" id="location-btn" onclick="handleLocationSearch()">Go</button>
     </div>
+    <div class="favorites-row" id="favorites-row"></div>
     <div class="location-divider">
       <div class="divider-line-sm"></div>
       <span>or</span>
@@ -893,7 +1015,11 @@
   <!-- Current Conditions -->
   <p class="section-label">Current Conditions</p>
   <div class="conditions-grid" id="current-grid">
-    <div class="cond-card"><div class="cond-label">Temperature</div><div class="cond-val"><span id="c-temp">—</span><span class="cond-unit">°F</span></div><div class="cond-desc" id="c-feels">Feels like —°F</div></div>
+    <div class="cond-card cond-card-temp"><div class="cond-label">Temperature</div><div class="cond-val"><span id="c-temp">—</span><span class="cond-unit">°F</span></div><div class="cond-desc" id="c-feels">Feels like —°F</div>
+      <div class="temp-trend-wrap">
+        <svg id="temp-trend-chart" class="temp-trend-svg" viewBox="0 0 240 44" preserveAspectRatio="none" role="img" aria-label="Feels-like temperature trend for the next 48 hours"></svg>
+      </div>
+    </div>
     <div class="cond-card"><div class="cond-label">Sky</div><div class="cond-val" style="font-size:1.1rem;padding-top:0.25rem" id="c-sky">—</div><div class="cond-desc" id="c-sky-sub"></div></div>
     <div class="cond-card"><div class="cond-label">Wind</div><div class="cond-val"><span id="c-wind">—</span><span class="cond-unit">mph</span></div><div class="cond-desc" id="c-winddir">—</div></div>
     <div class="cond-card"><div class="cond-label">Humidity</div><div class="cond-val"><span id="c-hum">—</span><span class="cond-unit">%</span></div><div class="cond-desc" id="c-dew">Dew point —°F</div></div>
@@ -903,7 +1029,7 @@
   </div>
 
   <!-- Hourly -->
-  <p class="section-label">Next 12 Hours</p>
+  <p class="section-label">Next 48 Hours</p>
   <div class="hourly-scroll" id="hourly-row">
     <div style="color:var(--text-muted); font-size:0.82rem; padding:0.5rem;">Loading…</div>
   </div>
@@ -1076,6 +1202,12 @@ function offsetCoord(lat, lon, distanceMiles, bearingDeg) {
   return { lat: lat2 * 180 / Math.PI, lon: lon2 * 180 / Math.PI };
 }
 
+// ⚠️ KNOWN ISSUE: this function uses Nominatim in a "systematic grid query"
+// pattern (multiple reverse-geocode probes around a computed point), which
+// Nominatim's usage policy explicitly disallows regardless of request
+// pacing. This has resulted in our requests being blocked. This needs a
+// proper replacement (a provider that supports batch/grid-style lookups
+// without violating its terms) — flagged here rather than silently retried.
 async function findNearbyTowns(lat, lon, originName) {
   const bearings = [0, 60, 120, 180, 240, 300]; // 6 directions around the compass
   const radii = [8, 16]; // probe both a close ring and a farther ring per bearing
@@ -1087,30 +1219,35 @@ async function findNearbyTowns(lat, lon, originName) {
     }
   }
 
-  const results = await Promise.allSettled(points.map(async (p) => {
-    // zoom=14 favors actual city/town/village/suburb nodes over coarse
-    // administrative boundaries like counties.
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${p.lat}&lon=${p.lon}&format=json&zoom=14&addressdetails=1`, {
-      headers: { 'Accept-Language': 'en' }
-    });
-    const d = await res.json();
-    const addr = d.address || {};
-    if (addr.country_code !== 'us') return null;
-
-    // Only accept actual named settlements — never a county, region, or
-    // other administrative-only label. If none of these fields are present,
-    // skip this point rather than falling back to something broader.
-    const rawName = addr.city || addr.town || addr.village || addr.suburb || addr.hamlet;
-    if (!rawName) return null;
-    const name = cleanPlaceName(rawName);
-
-    const stateName = addr.state ? usStateAbbr(addr.state) : '';
-    return { name, state: stateName, lat: p.lat, lon: p.lon };
-  }));
-
-  const towns = results
-    .filter(r => r.status === 'fulfilled' && r.value)
-    .map(r => r.value);
+  // Nominatim's fair-use policy expects roughly 1 request/second, not a
+  // burst of parallel calls. Firing all 12 probes simultaneously (the old
+  // approach) risked tripping rate limiting and silently zeroing out every
+  // result at once. Run them sequentially with a short delay between each
+  // instead — slower, but reliable.
+  const towns = [];
+  for (const p of points) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${p.lat}&lon=${p.lon}&format=json&zoom=14&addressdetails=1`, {
+        headers: { 'Accept-Language': 'en' }
+      });
+      const d = await res.json();
+      const addr = d.address || {};
+      if (addr.country_code === 'us') {
+        // Only accept actual named settlements — never a county, region, or
+        // other administrative-only label. Skip the point if none present.
+        const rawName = addr.city || addr.town || addr.village || addr.suburb || addr.hamlet;
+        if (rawName) {
+          const name = cleanPlaceName(rawName);
+          const stateName = addr.state ? usStateAbbr(addr.state) : '';
+          towns.push({ name, state: stateName, lat: p.lat, lon: p.lon });
+        }
+      }
+    } catch (e) {
+      // Skip this probe point on failure (network error, rate limit, etc.)
+      // and continue with the rest rather than aborting the whole search.
+    }
+    await new Promise(resolve => setTimeout(resolve, 250)); // ~4 req/sec, well under typical fair-use limits
+  }
 
   // Prefer closer towns first — important now that we probe two radii,
   // so a near neighbor (like Madison from Verona) wins over a farther one
@@ -1139,7 +1276,7 @@ async function fetchWeather() {
   if (!currentLocation) return;
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${currentLocation.lat}&longitude=${currentLocation.lon}`
     + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,uv_index,visibility,dew_point_2m`
-    + `&hourly=temperature_2m,weather_code,precipitation_probability,precipitation`
+    + `&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,precipitation`
     + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset`
     + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
     + `&timezone=${encodeURIComponent(currentLocation.timezone)}&forecast_days=7&past_days=1`;
@@ -1149,11 +1286,13 @@ async function fetchWeather() {
     const d = await res.json();
     renderCurrent(d.current);
     renderHourly(d.hourly);
+    renderTempTrend(d.hourly);
     renderDaily(d.daily);
     renderPrecipHistory(d.hourly);
     renderDaySummary(d.daily, d.current);
     document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('en-US', { timeZone: currentLocation.timezone, hour:'numeric', minute:'2-digit' });
   } catch(e) {
+    console.error('fetchWeather failed:', e);
     document.getElementById('current-grid').innerHTML = '<p style="color:var(--text-muted)">Could not load weather data. Check your connection.</p>';
   }
 }
@@ -1198,7 +1337,6 @@ function renderCurrent(c) {
 
 function renderHourly(h) {
   const now = new Date();
-  const currentHour = now.getHours();
   const container = document.getElementById('hourly-row');
   container.innerHTML = '';
   // Find start index matching current hour
@@ -1207,8 +1345,26 @@ function renderHourly(h) {
     const t = new Date(h.time[i]);
     if (t >= now) { startIdx = i; break; }
   }
-  for (let i = startIdx; i < Math.min(startIdx + 13, h.time.length); i++) {
+
+  let lastDateStr = null;
+  const endIdx = Math.min(startIdx + 49, h.time.length); // 48 hours out + the "Now" card
+
+  for (let i = startIdx; i < endIdx; i++) {
     const t = new Date(h.time[i]);
+    const dateStr = t.toLocaleDateString('en-US', { timeZone: currentLocation.timezone });
+
+    // Insert a small day-divider the first time we cross into a new calendar day,
+    // so a 48-hour scroll still reads as "today / tonight / tomorrow" rather
+    // than an undifferentiated wall of times.
+    if (lastDateStr !== null && dateStr !== lastDateStr) {
+      const dayLabel = t.toLocaleDateString('en-US', { weekday: 'short', timeZone: currentLocation.timezone });
+      const divider = document.createElement('div');
+      divider.className = 'hour-day-divider';
+      divider.innerHTML = `<span>${dayLabel}</span>`;
+      container.appendChild(divider);
+    }
+    lastDateStr = dateStr;
+
     const label = i === startIdx ? 'Now' : t.toLocaleTimeString('en-US', { hour:'numeric', hour12:true, timeZone: currentLocation.timezone });
     const [, icon] = wmoInfo(h.weather_code[i]);
     const prob = h.precipitation_probability[i];
@@ -1222,6 +1378,66 @@ function renderHourly(h) {
     `;
     container.appendChild(card);
   }
+}
+
+// Renders a small sparkline of "feels like" temperature for the next 48
+// hours, inline inside the Temperature card. Shares the same hourly array
+// and current-hour lookup logic as renderHourly.
+function renderTempTrend(h) {
+  const svg = document.getElementById('temp-trend-chart');
+  const now = new Date();
+
+  let startIdx = 0;
+  for (let i = 0; i < h.time.length; i++) {
+    const t = new Date(h.time[i]);
+    if (t >= now) { startIdx = i; break; }
+  }
+  const endIdx = Math.min(startIdx + 49, h.time.length); // 48 hours + now
+  const slice = h.apparent_temperature.slice(startIdx, endIdx);
+  const times = h.time.slice(startIdx, endIdx).map(t => new Date(t));
+
+  if (slice.length < 2) {
+    svg.innerHTML = '';
+    return;
+  }
+
+  const W = 240, H = 44, padTop = 6, padBottom = 6;
+  const min = Math.min(...slice);
+  const max = Math.max(...slice);
+  const range = (max - min) || 1; // avoid div-by-zero on a perfectly flat trend
+
+  const points = slice.map((v, i) => {
+    const x = (i / (slice.length - 1)) * W;
+    const y = padTop + (1 - (v - min) / range) * (H - padTop - padBottom);
+    return [x, y];
+  });
+
+  const linePath = points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const fillPath = linePath + ` L${W},${H} L0,${H} Z`;
+
+  // Day-boundary tick marks, same logic as the hourly scroll's day dividers.
+  let dayTicks = '';
+  let lastDateStr = times[0].toLocaleDateString('en-US', { timeZone: currentLocation.timezone });
+  for (let i = 1; i < times.length; i++) {
+    const dateStr = times[i].toLocaleDateString('en-US', { timeZone: currentLocation.timezone });
+    if (dateStr !== lastDateStr) {
+      const x = (i / (slice.length - 1)) * W;
+      dayTicks += `<line class="temp-trend-day-tick" x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="${H}" />`;
+      lastDateStr = dateStr;
+    }
+  }
+
+  const nowPoint = points[0];
+  const lastPoint = points[points.length - 1];
+
+  svg.innerHTML = `
+    <path class="temp-trend-fill" d="${fillPath}" />
+    ${dayTicks}
+    <path class="temp-trend-line" d="${linePath}" />
+    <circle class="temp-trend-now-dot" cx="${nowPoint[0].toFixed(1)}" cy="${nowPoint[1].toFixed(1)}" r="2.4" />
+    <text class="temp-trend-label" x="2" y="${H - 1}">${Math.round(min)}°</text>
+    <text class="temp-trend-label" x="${(W - 14).toFixed(1)}" y="8">${Math.round(max)}°</text>
+  `;
 }
 
 function renderPrecipHistory(h) {
@@ -1403,7 +1619,7 @@ async function fetchAreas() {
   }
 
   if (towns.length === 0) {
-    grid.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; grid-column:1/-1;">No nearby areas found.</div>';
+    grid.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; grid-column:1/-1;">Surrounding areas are temporarily unavailable. This section is being rebuilt on a more reliable data source.</div>';
     return;
   }
 
@@ -1662,11 +1878,18 @@ async function loadLocation(loc) {
   const stateLabel = loc.admin1 || '';
   const displayName = stateLabel ? `${loc.name}, ${usStateAbbr(stateLabel)}` : loc.name;
 
+  // Accepts either shape: the geocoding API returns latitude/longitude,
+  // while our own saved favorites/last-location storage uses lat/lon
+  // (matching currentLocation's own property names). Support both so a
+  // location object can be passed in from any source without conversion.
+  const lat = loc.lat ?? loc.latitude;
+  const lon = loc.lon ?? loc.longitude;
+
   currentLocation = {
     name: loc.name,
     admin1: stateLabel,
-    lat: loc.latitude,
-    lon: loc.longitude,
+    lat: lat,
+    lon: lon,
     timezone: loc.timezone || 'America/Chicago',
     displayName
   };
@@ -1677,14 +1900,17 @@ async function loadLocation(loc) {
   document.getElementById('app-content').classList.remove('app-content-hidden');
 
   document.getElementById('location-label').textContent = currentLocation.displayName;
-  document.getElementById('location-status').innerHTML =
-    `Showing weather for <strong style="color:var(--text)">${currentLocation.displayName}</strong> · <button class="location-reset" onclick="clearLocation()">Search a different location</button>`;
+  updateLocationStatus();
   document.getElementById('divider-sub-day').textContent =
     `Current conditions, today's outlook, and recent rainfall for ${currentLocation.displayName}`;
   document.getElementById('divider-sub-week').textContent =
     `A 7-day look at highs, lows, and rain chances for ${currentLocation.displayName}`;
   document.getElementById('divider-sub').textContent =
     `Live alerts, radar, and forecast data for ${currentLocation.displayName} & the surrounding area`;
+
+  // Remember this as the last-viewed location so it auto-loads next visit.
+  saveLastLocation(currentLocation);
+  renderFavoritesRow();
 
   updateClock();
 
@@ -1752,6 +1978,127 @@ function clearLocation() {
   document.getElementById('divider-sub-day').textContent = 'Current conditions, today\'s outlook, and recent rainfall for your area';
   document.getElementById('divider-sub-week').textContent = 'A 7-day look at highs, lows, and rain chances for your area';
   document.getElementById('divider-sub').textContent = 'Live alerts, radar, and forecast data for your area';
+}
+
+// ── Favorites & last-location persistence (localStorage) ──
+// Everything here stays entirely on the visitor's own device — nothing is
+// sent anywhere. "Favorites" is a small list of saved locations; "last
+// location" is whichever place was most recently viewed, auto-loaded on
+// the next visit so people don't have to re-search every time.
+const STORAGE_KEY_FAVORITES = 'weatherbens_favorites';
+const STORAGE_KEY_LAST = 'weatherbens_last_location';
+
+function getFavorites() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_FAVORITES);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setFavorites(list) {
+  try {
+    localStorage.setItem(STORAGE_KEY_FAVORITES, JSON.stringify(list));
+  } catch (e) { /* localStorage unavailable — fail silently, favorites just won't persist */ }
+}
+
+function favoriteKey(loc) {
+  return `${loc.name.toLowerCase()}|${(loc.admin1 || '').toLowerCase()}`;
+}
+
+function isFavorited(loc) {
+  if (!loc) return false;
+  const key = favoriteKey(loc);
+  return getFavorites().some(f => favoriteKey(f) === key);
+}
+
+function toggleFavorite() {
+  if (!currentLocation) return;
+  const favs = getFavorites();
+  const key = favoriteKey(currentLocation);
+  const idx = favs.findIndex(f => favoriteKey(f) === key);
+
+  if (idx >= 0) {
+    favs.splice(idx, 1); // already saved — remove it
+  } else {
+    favs.push({
+      name: currentLocation.name,
+      admin1: currentLocation.admin1,
+      lat: currentLocation.lat,
+      lon: currentLocation.lon,
+      timezone: currentLocation.timezone,
+      displayName: currentLocation.displayName
+    });
+  }
+  setFavorites(favs);
+  updateLocationStatus();
+  renderFavoritesRow();
+}
+
+function removeFavorite(key, event) {
+  if (event) event.stopPropagation();
+  const favs = getFavorites().filter(f => favoriteKey(f) !== key);
+  setFavorites(favs);
+  renderFavoritesRow();
+  if (currentLocation && favoriteKey(currentLocation) === key) {
+    updateLocationStatus();
+  }
+}
+
+function renderFavoritesRow() {
+  const row = document.getElementById('favorites-row');
+  const favs = getFavorites();
+  if (favs.length === 0) {
+    row.innerHTML = '';
+    row.style.display = 'none';
+    return;
+  }
+  row.style.display = 'flex';
+  row.innerHTML = favs.map(f => {
+    const key = favoriteKey(f);
+    const isActive = currentLocation && favoriteKey(currentLocation) === key;
+    return `<button class="fav-chip${isActive ? ' active' : ''}" onclick='loadLocation(${JSON.stringify(f)})'>
+      <span class="fav-chip-star">★</span>${f.displayName}
+      <span class="fav-chip-remove" onclick="removeFavorite('${key.replace(/'/g, "\\'")}', event)" aria-label="Remove favorite">✕</span>
+    </button>`;
+  }).join('');
+}
+
+// Updates the status line under the search bar, including the save/saved star toggle.
+function updateLocationStatus() {
+  const statusEl = document.getElementById('location-status');
+  if (!currentLocation) {
+    statusEl.textContent = 'Enter a city and state to load weather, alerts, and radar for your area.';
+    return;
+  }
+  const saved = isFavorited(currentLocation);
+  statusEl.innerHTML =
+    `Showing weather for <strong style="color:var(--text)">${currentLocation.displayName}</strong> · ` +
+    `<button class="location-reset" onclick="clearLocation()">Search a different location</button> · ` +
+    `<button class="fav-toggle${saved ? ' saved' : ''}" onclick="toggleFavorite()">${saved ? '★ Saved' : '☆ Save this location'}</button>`;
+}
+
+function saveLastLocation(loc) {
+  try {
+    localStorage.setItem(STORAGE_KEY_LAST, JSON.stringify({
+      name: loc.name,
+      admin1: loc.admin1,
+      lat: loc.lat,
+      lon: loc.lon,
+      timezone: loc.timezone,
+      displayName: loc.displayName
+    }));
+  } catch (e) { /* fail silently */ }
+}
+
+function getLastLocation() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_LAST);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 // US state full-name → abbreviation (Open-Meteo's admin1 returns full names)
@@ -1890,19 +2237,22 @@ async function handleUseMyLocation() {
 }
 
 // Reverse geocode lat/lon → { name, admin1, latitude, longitude, timezone }
-// Uses Nominatim (OpenStreetMap) for the place name/state, then asks
-// Open-Meteo for the timezone at that point (Nominatim doesn't provide one).
+// Uses BigDataCloud's free client-side reverse geocoding endpoint instead
+// of Nominatim. This call is compliant with BigDataCloud's fair use policy
+// specifically because it passes the device's own live GPS coordinates,
+// obtained directly via navigator.geolocation in handleUseMyLocation() —
+// their policy requires exactly that (current device location, not
+// pre-computed or third-party coordinates) for this free endpoint.
+// IMPORTANT: do not reuse this function for any case involving computed/
+// offset coordinates (e.g. a grid search) — that would violate their policy.
 async function reverseGeocode(lat, lon) {
-  const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`, {
-    headers: { 'Accept-Language': 'en' }
-  });
+  const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
   const d = await res.json();
-  const addr = d.address || {};
 
-  if (addr.country_code !== 'us') return null; // US-only, per requirement
+  if (!d.countryCode || d.countryCode !== 'US') return null; // US-only, per requirement
 
-  const rawName = addr.city || addr.town || addr.village || addr.hamlet || addr.county || d.name;
-  const admin1 = addr.state || '';
+  const rawName = d.city || d.locality;
+  const admin1 = d.principalSubdivision || '';
   if (!rawName) return null;
   const name = cleanPlaceName(rawName);
 
@@ -1936,7 +2286,15 @@ function checkRadar() {
 }
 
 // ── Init ──
-// No default location — page starts in the locked/search-first state.
+// Auto-load the last-viewed location if one was saved on this device,
+// and show any saved favorite chips. If neither exists, the page starts
+// in the locked/search-first state as before.
+renderFavoritesRow();
+const lastLocation = getLastLocation();
+if (lastLocation) {
+  loadLocation(lastLocation);
+}
+
 // Background intervals are safe to set now; they no-op until currentLocation is set.
 setInterval(() => { if (currentLocation) fetchWeather(); }, 5 * 60 * 1000); // refresh every 5 min
 setInterval(() => { if (currentLocation) fetchAlerts(); }, 60 * 1000); // refresh every 60 sec — severe weather alerts need to be near real-time
