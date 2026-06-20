@@ -1939,7 +1939,7 @@ function checkRadar() {
 // No default location — page starts in the locked/search-first state.
 // Background intervals are safe to set now; they no-op until currentLocation is set.
 setInterval(() => { if (currentLocation) fetchWeather(); }, 5 * 60 * 1000); // refresh every 5 min
-setInterval(() => { if (currentLocation) fetchAlerts(); }, 3 * 60 * 1000);
+setInterval(() => { if (currentLocation) fetchAlerts(); }, 60 * 1000); // refresh every 60 sec — severe weather alerts need to be near real-time
 </script>
 </body>
 </html>
