@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Send Feedback — WeatherBen's Weather Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #0a1628;
+    --sky-mid: #0f2040;
+    --sky-light: #1a3560;
+    --accent: #4db8ff;
+    --electric: #f5ff3d;
+    --warning: #ffd23f;
+    --text: #e8f0fe;
+    --text-muted: #8aa4cc;
+    --border: rgba(77, 184, 255, 0.18);
+    --card: rgba(15, 32, 64, 0.85);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--sky);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(77,184,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(244,165,34,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 0 1.25rem 4rem;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0 1rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .brand-name {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .brand-name .ben { color: var(--electric); }
+
+  .back-btn {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #111;
+    background: var(--electric);
+    text-decoration: none;
+    border-radius: 5px;
+    padding: 0.3rem 0.75rem;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .back-btn:hover { opacity: 0.85; }
+
+  .page-hero {
+    padding: 2.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-hero h1 {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .page-hero p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    max-width: 500px;
+  }
+
+  /* ── Form card ── */
+  .form-card {
+    margin-top: 2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .field:last-of-type { margin-bottom: 0; }
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .label-hint {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 0.4rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea {
+    width: 100%;
+    background: rgba(10, 22, 40, 0.8);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.87rem;
+    padding: 0.6rem 0.85rem;
+    transition: border-color 0.15s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--accent);
+  }
+  input::placeholder, textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  select option { background: var(--sky-mid); color: var(--text); }
+
+  textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+
+  /* Honeypot — visually hidden from real users */
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    visibility: hidden;
+  }
+
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .submit-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .submit-btn {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #111;
+    background: var(--electric);
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.4rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:active { opacity: 0.7; }
+
+  .footer-note {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 480px) {
+    .form-card { padding: 1.25rem; }
+    .page-hero h1 { font-size: 1.25rem; }
+    .submit-row { flex-direction: column; align-items: stretch; }
+    .submit-btn { text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="brand-name"><span class="ben">WeatherBen's</span> Weather Hub</span>
+    <a href="index.html" class="back-btn">← Back to Weather Hub</a>
+  </header>
+
+  <div class="page-hero">
+    <h1>Send Feedback</h1>
+    <p>Found a bug, noticed incorrect weather data, or have a feature idea? Your input helps make this tool better.</p>
+  </div>
+
+  <div class="form-card">
+    <!--
+      Netlify Forms:
+      - The "netlify" attribute tells Netlify to handle submissions.
+      - "name" is what the form is called in your Netlify dashboard.
+      - "action" redirects to a custom success page instead of Netlify's generic one.
+      - "netlify-honeypot" provides bot spam protection via a hidden field.
+    -->
+    <form
+      name="weather-hub-feedback"
+      method="POST"
+      action="/success.html"
+      netlify
+      netlify-honeypot="bot-field"
+    >
+      <!-- Honeypot: hidden from humans, bots fill it in and get rejected -->
+      <p class="honeypot">
+        <label>Don't fill this out: <input name="bot-field"></label>
+      </p>
+
+      <!-- Required by Netlify for JS-rendered forms — safe to include here too -->
+      <input type="hidden" name="form-name" value="weather-hub-feedback">
+
+      <div class="field">
+        <label for="device">Device / Browser <span class="label-hint">optional</span></label>
+        <select id="device" name="device">
+          <option value="">— Select —</option>
+          <option>iPhone / Safari</option>
+          <option>Android / Chrome</option>
+          <option>Desktop / Chrome</option>
+          <option>Desktop / Firefox</option>
+          <option>Desktop / Safari</option>
+          <option>Desktop / Edge</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="category">Type of feedback <span class="label-hint">optional</span></label>
+        <select id="category" name="category">
+          <option value="">— Select —</option>
+          <option>Bug report — something isn't working</option>
+          <option>Inaccurate weather data or alerts</option>
+          <option>Feature request</option>
+          <option>Design / layout issue</option>
+          <option>General feedback</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="location">Location you were searching <span class="label-hint">optional — helps with alert accuracy issues</span></label>
+        <input type="text" id="location" name="location" placeholder="e.g. Bowling Green, KY">
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="field">
+        <label for="message">Your feedback <span class="label-hint">required</span></label>
+        <textarea id="message" name="message" placeholder="Describe the issue or idea in as much detail as you'd like..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="email">Email address <span class="label-hint">optional — only if you'd like a reply</span></label>
+        <input type="email" id="email" name="email" placeholder="you@example.com">
+      </div>
+
+      <div class="submit-row">
+        <p class="submit-note">Submissions go directly to the developer. Response times may vary. No account required.</p>
+        <button type="submit" class="submit-btn">Send Feedback</button>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="footer-note">
+    WeatherBen's Weather Hub is a personal beta project. Not affiliated with NWS, NOAA, or any official weather agency.<br>
+    <a href="guide.html#disclaimer" style="color:var(--text-muted);">Full disclaimer ↗</a>
+  </div>
+
+</div>
+</body>
+</html>

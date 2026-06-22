@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback Received — WeatherBen's Weather Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #0a1628;
+    --accent: #4db8ff;
+    --electric: #f5ff3d;
+    --success: #3ecf8e;
+    --text: #e8f0fe;
+    --text-muted: #8aa4cc;
+    --border: rgba(77, 184, 255, 0.18);
+    --card: rgba(15, 32, 64, 0.85);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--sky);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(77,184,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(244,165,34,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    background: var(--card);
+    border: 1px solid rgba(62, 207, 142, 0.3);
+    border-radius: 14px;
+    padding: 2.5rem 2rem;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .check {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    line-height: 1;
+    color: var(--success);
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: 1.25rem;
+    color: var(--success);
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  p:last-of-type { margin-bottom: 0; }
+
+  .btn-row {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #111;
+    background: var(--electric);
+    text-decoration: none;
+    border-radius: 6px;
+    padding: 0.55rem 1.2rem;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    border-radius: 6px;
+    padding: 0.55rem 1.2rem;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .btn-secondary:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="check">✓</div>
+    <h1>Feedback received</h1>
+    <p>Thanks for taking the time to share your thoughts. Your submission has been sent directly to the developer.</p>
+    <p>If you included your email address and your feedback needs a reply, we'll be in touch. Either way, it all helps make the tool better.</p>
+    <div class="btn-row">
+      <a href="index.html" class="btn-primary">Back to Weather Hub</a>
+      <a href="feedback.html" class="btn-secondary">Send more feedback</a>
+    </div>
+  </div>
+
+</body>
+</html>
