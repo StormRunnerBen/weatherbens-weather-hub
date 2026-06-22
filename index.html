@@ -1232,6 +1232,19 @@
     <div class="alert-item all-clear"><span class="all-clear-dot" style="background:var(--text-muted); box-shadow:none;"></span>Checking for active alerts…</div>
   </div>
 
+  <!-- Alert detail modal -->
+  <div id="alert-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="alert-modal-title-text">
+    <div class="alert-modal">
+      <div class="alert-modal-header">
+        <div class="alert-modal-title" id="alert-modal-title-text"></div>
+        <button type="button" class="alert-modal-close" onclick="closeAlertModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="alert-modal-meta" id="alert-modal-meta"></div>
+      <div id="alert-modal-sections"></div>
+      <div class="alert-modal-footer" id="alert-modal-footer"></div>
+    </div>
+  </div>
+
   <!-- Radar -->
   <p class="section-label">Live Radar · NWS</p>
   <div class="radar-wrap">
@@ -1795,20 +1808,203 @@ document.getElementById('briefing-toggle').addEventListener('click', toggleBrief
 // Yellow = Severe Thunderstorm (Warning or Watch)
 // Green = Flood related
 // Lavender = other advisories, Special Weather Statements, everything else
+// ── Alert severity sort order ──
+// Lower number = higher priority. Ensures a Tornado Warning always renders
+// above a co-existing Severe Thunderstorm Warning or watch, which was the
+// root cause of the Ferdinand, IN misclassification (both covered the same
+// county zone; STW happened to come first in the API response).
+function alertSortPriority(event, p) {
+  const e = event.toUpperCase();
+  const params = (p && p.parameters) || {};
+  const damageThreat = ((params.tornadoDamageThreat || [])[0] || '').toUpperCase();
+  const detection    = ((params.tornadoDetection    || [])[0] || '').toUpperCase();
+  const stDamage     = ((params.thunderstormDamageThreat || [])[0] || '').toUpperCase();
+  const text = (((p && p.description) || '') + ' ' + ((p && p.headline) || '')).toUpperCase();
+
+  if (/TORNADO/.test(e)) {
+    // Tornado Emergency (catastrophic tag or explicit wording)
+    if (damageThreat === 'CATASTROPHIC' || /TORNADO EMERGENCY/.test(e) || /TORNADO EMERGENCY/.test(text)) return 0;
+    // PDS Tornado Warning (considerable tag or explicit wording)
+    if (damageThreat === 'CONSIDERABLE' || /PARTICULARLY DANGEROUS SITUATION/.test(text)) return 1;
+    // Observed/confirmed Tornado Warning
+    if (detection === 'OBSERVED' || /\bOBSERVED\b/.test(text)) return 2;
+    // Radar-indicated Tornado Warning
+    if (/TORNADO WARNING/.test(e)) return 3;
+    // Tornado Watch
+    return 7;
+  }
+
+  if (/SEVERE THUNDERSTORM WARNING/.test(e)) {
+    if (stDamage === 'DESTRUCTIVE'  || /DESTRUCTIVE/.test(text))  return 4;
+    if (stDamage === 'CONSIDERABLE' || /CONSIDERABLE/.test(text)) return 5;
+    return 6;
+  }
+
+  if (/FLASH FLOOD EMERGENCY/.test(e) || /FLASH FLOOD EMERGENCY/.test(text)) return 8;
+  if (/FLASH FLOOD WARNING/.test(e))   return 9;
+  if (/FLOOD WARNING/.test(e))         return 10;
+  if (/TORNADO WATCH/.test(e))         return 11;
+  if (/SEVERE THUNDERSTORM WATCH/.test(e)) return 12;
+  if (/FLASH FLOOD WATCH/.test(e))     return 13;
+  if (/FLOOD WATCH/.test(e))           return 14;
+  if (/FLOOD ADVISORY/.test(e))        return 15;
+  return 99;
+}
+
+function buildAlertHTML(f, index) {
+  const p = f.properties;
+  const isTornado = /tornado/i.test(p.event);
+  let cls = '', innerHtml = '';
+
+  if (isTornado) {
+    const tier = tornadoTier(p);
+    const tagHtml = tier.tagCls ? `<span class="tag-pill ${tier.tagCls}">${tier.tag}</span>` : '';
+    cls = tier.cls;
+    innerHtml = `<span class="alert-pill">${p.event}</span>${tagHtml}
+      ${p.headline || (p.description || '').slice(0, 200)}
+      <span class="alert-expand-hint">Tap for full NWS report</span>`;
+  } else {
+    const sevClass = alertSeverityClass(p.event);
+    if (sevClass === 'sev-flood') {
+      const ftier = floodTier(p);
+      const ffe = hasFlashFloodEmergency(p);
+      const tagHtml = ftier.tagCls ? `<span class="tag-pill ${ftier.tagCls}">${ftier.tag}</span>` : '';
+      const ffeTagHtml = ffe ? `<span class="tag-pill tag-ffe">FLASH FLOOD EMERGENCY</span>` : '';
+      cls = `${sevClass} ${ftier.cls} ${ffe ? 'has-ffe' : ''}`;
+      innerHtml = `<span class="alert-pill">${p.event}</span>${tagHtml}${ffeTagHtml}
+        ${p.headline || (p.description || '').slice(0, 200)}
+        <span class="alert-expand-hint">Tap for full NWS report</span>`;
+    } else if (sevClass === 'sev-warning') {
+      const tstier = thunderstormTier(p);
+      const torPossible = hasTornadoPossible(p);
+      const tagHtml = tstier.tagCls ? `<span class="tag-pill ${tstier.tagCls}">${tstier.tag}</span>` : '';
+      const torTagHtml = torPossible ? `<span class="tag-pill tag-tor-possible">TORNADO POSSIBLE</span>` : '';
+      cls = `${sevClass} ${tstier.cls} ${torPossible ? 'has-tor-possible' : ''}`;
+      innerHtml = `<span class="alert-pill">${p.event}</span>${tagHtml}${torTagHtml}
+        ${p.headline || (p.description || '').slice(0, 200)}
+        <span class="alert-expand-hint">Tap for full NWS report</span>`;
+    } else {
+      cls = sevClass || '';
+      innerHtml = `<span class="alert-pill">${p.event}</span>
+        ${p.headline || (p.description || '').slice(0, 200)}
+        <span class="alert-expand-hint">Tap for full NWS report</span>`;
+    }
+  }
+
+  return `<div class="alert-item ${cls} is-clickable" onclick="openAlertModal(${index})">${innerHtml}</div>`;
+}
+
+// Stores the current sorted alert features for the modal to reference by index.
+let currentAlertFeatures = [];
+
+function openAlertModal(index) {
+  const f = currentAlertFeatures[index];
+  if (!f) return;
+  const p = f.properties;
+
+  document.getElementById('alert-modal-title-text').textContent = p.event;
+
+  // Meta row: effective, expires, issuing office
+  const fmt = dt => dt ? new Date(dt).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+    timeZoneName: 'short'
+  }) : '—';
+  const sender = p.senderName || p.sender || 'National Weather Service';
+  document.getElementById('alert-modal-meta').innerHTML = `
+    <span><strong>Issued by:</strong> ${sender}</span>
+    <span><strong>Effective:</strong> ${fmt(p.effective || p.sent)}</span>
+    <span><strong>Expires:</strong> ${fmt(p.expires || p.ends)}</span>
+  `;
+
+  // Body sections — NWS text is structured as labeled paragraphs;
+  // display each meaningful chunk in its own labelled section.
+  const sections = [];
+  if (p.headline) {
+    sections.push({ label: 'Headline', text: p.headline });
+  }
+  if (p.description) {
+    sections.push({ label: 'Description', text: p.description });
+  }
+  if (p.instruction) {
+    sections.push({ label: 'Instructions', text: p.instruction });
+  }
+  if (p.areaDesc) {
+    sections.push({ label: 'Affected Area', text: p.areaDesc });
+  }
+
+  document.getElementById('alert-modal-sections').innerHTML = sections.map(s => `
+    <div class="alert-modal-section">
+      <div class="alert-modal-label">${s.label}</div>
+      <div class="alert-modal-body">${s.text}</div>
+    </div>
+  `).join('');
+
+  // Footer with link to weather.gov
+  const nwsUrl = p['@id'] || f.id || 'https://www.weather.gov/';
+  document.getElementById('alert-modal-footer').innerHTML =
+    `Full report: <a href="${nwsUrl}" target="_blank" rel="noopener">View on weather.gov ↗</a>`;
+
+  document.getElementById('alert-modal-overlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAlertModal() {
+  document.getElementById('alert-modal-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// Close on overlay click (outside the modal card)
+document.getElementById('alert-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAlertModal();
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAlertModal();
+});
+
 function tornadoTier(p) {
+  // Prefer the structured IBW parameters field over free-text scanning —
+  // it's set by NWS's WarnGen software at issuance time and is authoritative.
+  // properties.parameters is an object where each key maps to an array value.
+  //   tornadoDamageThreat: ["CONSIDERABLE"] = PDS
+  //   tornadoDamageThreat: ["CATASTROPHIC"] = Tornado Emergency
+  //   tornadoDetection:    ["OBSERVED"]     = confirmed by spotter/radar debris
+  const params = p.parameters || {};
+  const damageThreat = (params.tornadoDamageThreat || [])[0] || '';
+  const detection = (params.tornadoDetection || [])[0] || '';
+
+  // Fall back to free-text scan for offices/products that don't populate
+  // the parameters field reliably (older SVS updates, some WFOs, etc.)
   const text = ((p.description || '') + ' ' + (p.headline || '')).toUpperCase();
-  if (/TORNADO EMERGENCY/.test(text)) return { cls: 'tor-emergency', tag: 'TORNADO EMERGENCY', tagCls: 'tag-emergency' };
-  if (/PARTICULARLY DANGEROUS SITUATION/.test(text)) return { cls: 'tor-pds', tag: 'PDS', tagCls: 'tag-pds' };
-  if (/OBSERVED/.test(text)) return { cls: 'tor-confirmed', tag: 'CONFIRMED', tagCls: '' };
+
+  // Tornado Emergency — catastrophic damage threat or explicit TE wording
+  if (damageThreat.toUpperCase() === 'CATASTROPHIC' || /TORNADO EMERGENCY/.test(text)) {
+    return { cls: 'tor-emergency', tag: 'TORNADO EMERGENCY', tagCls: 'tag-emergency' };
+  }
+
+  // PDS — considerable damage threat or explicit PDS wording (any form)
+  if (damageThreat.toUpperCase() === 'CONSIDERABLE' ||
+      /PARTICULARLY DANGEROUS SITUATION/.test(text)) {
+    return { cls: 'tor-pds', tag: 'PDS', tagCls: 'tag-pds' };
+  }
+
+  // Observed/confirmed — structured field or text
+  if (detection.toUpperCase() === 'OBSERVED' || /\bOBSERVED\b/.test(text)) {
+    return { cls: 'tor-confirmed', tag: 'CONFIRMED', tagCls: '' };
+  }
+
   return { cls: 'tor-radar', tag: 'RADAR INDICATED', tagCls: '' };
 }
 
 // Severe Thunderstorm Warnings escalate via NWS damage threat tags (yellow family):
 //   base (no tag) → Considerable → Destructive
 function thunderstormTier(p) {
+  const params = p.parameters || {};
+  const damageThreat = ((params.thunderstormDamageThreat || [])[0] || '').toUpperCase();
   const text = ((p.description || '') + ' ' + (p.headline || '')).toUpperCase();
-  if (/DESTRUCTIVE/.test(text)) return { cls: 'sev-destructive', tag: 'DESTRUCTIVE', tagCls: 'tag-destructive' };
-  if (/CONSIDERABLE/.test(text)) return { cls: 'sev-considerable', tag: 'CONSIDERABLE', tagCls: 'tag-considerable' };
+  if (damageThreat === 'DESTRUCTIVE' || /DESTRUCTIVE/.test(text))   return { cls: 'sev-destructive', tag: 'DESTRUCTIVE', tagCls: 'tag-destructive' };
+  if (damageThreat === 'CONSIDERABLE' || /CONSIDERABLE/.test(text)) return { cls: 'sev-considerable', tag: 'CONSIDERABLE', tagCls: 'tag-considerable' };
   return { cls: '', tag: null, tagCls: null };
 }
 
@@ -1819,12 +2015,14 @@ function thunderstormTier(p) {
 // similar to how Tornado Possible layers onto a Severe Thunderstorm Warning.
 function floodTier(p) {
   const event = (p.event || '').toUpperCase();
+  const params = p.parameters || {};
+  const damageThreat = ((params.flashFloodDamageThreat || [])[0] || '').toUpperCase();
   const text = ((p.description || '') + ' ' + (p.headline || '')).toUpperCase();
   const isFlashFloodWarning = /FLASH FLOOD WARNING/.test(event);
 
   if (isFlashFloodWarning) {
-    if (/CATASTROPHIC/.test(text)) return { cls: 'ffw-catastrophic', tag: 'CATASTROPHIC', tagCls: 'tag-ffw-catastrophic' };
-    if (/CONSIDERABLE/.test(text)) return { cls: 'ffw-considerable', tag: 'CONSIDERABLE', tagCls: 'tag-ffw-considerable' };
+    if (damageThreat === 'CATASTROPHIC' || /CATASTROPHIC/.test(text)) return { cls: 'ffw-catastrophic', tag: 'CATASTROPHIC', tagCls: 'tag-ffw-catastrophic' };
+    if (damageThreat === 'CONSIDERABLE' || /CONSIDERABLE/.test(text)) return { cls: 'ffw-considerable', tag: 'CONSIDERABLE', tagCls: 'tag-ffw-considerable' };
     return { cls: 'ffw-base', tag: null, tagCls: null };
   }
   if (/WATCH/.test(event)) return { cls: 'flood-watch', tag: null, tagCls: null };
@@ -1853,20 +2051,37 @@ function alertSeverityClass(event) {
   return 'sev-advisory';
 }
 
-// ── Fetch NWS alerts ──
-// Uses NWS's point-based alert query (lat,lon) instead of a county regex,
-// so this works automatically for any US location without per-location config.
-// Resolves the county UGC zone (e.g. "WIC025") for a lat/lon via the NWS
-// /points/ endpoint. Per NWS's own geolocation guidance (weather.gov/media/
-// documentation/docs/NWS_Geolocation.pdf), small-polygon county-based
-// products — Tornado Warning, Severe Thunderstorm Warning, Flash Flood
-// Warning, etc. — are the ones most likely to be missed by a plain point
-// query, and the documented fix is to query by county zone instead.
-// IMPORTANT: properties.county sits directly under properties (a sibling of
-// relativeLocation), NOT nested inside relativeLocation.properties — that
-// was incorrectly assumed in an earlier version of this code and silently
-// broke the lookup. Verified directly against a full, unparaphrased NWS API
-// response (github.com/weather-gov/api/discussions/478) before reapplying.
+// ── Point-in-polygon test (ray casting algorithm) ──
+// Used to filter polygon-based alerts (Tornado Warnings, Severe Thunderstorm
+// Warnings, Flash Flood Warnings) after fetching by county zone. The county
+// zone query is necessary to catch these small-polygon products in the first
+// place — the plain ?point= query misses them — but it's too coarse: it
+// returns any warning covering the county even if the actual tornado polygon
+// only covers the southwest corner. This test filters those down to alerts
+// whose polygon actually contains the user's coordinates.
+function pointInPolygon(lat, lon, polygon) {
+  // polygon is a GeoJSON coordinate array: [ [ [lon, lat], ... ] ]
+  const ring = polygon[0];
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1]; // lon, lat
+    const xj = ring[j][0], yj = ring[j][1];
+    const intersect = ((yi > lat) !== (yj > lat)) &&
+      (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function alertPassesPolygonFilter(f, lat, lon) {
+  // If the alert has a polygon geometry, check if the user's point is inside.
+  // If there's no polygon (county/zone-based product like a watch or advisory),
+  // pass it through — county membership is the correct criterion for those.
+  const geom = f.geometry;
+  if (!geom || geom.type !== 'Polygon' || !geom.coordinates) return true;
+  return pointInPolygon(lat, lon, geom.coordinates);
+}
+
 async function lookupCountyZone(lat, lon) {
   try {
     const res = await fetch(`https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`);
@@ -1894,50 +2109,27 @@ async function fetchAlerts() {
     const res = await fetch(alertsUrl);
     const d = await res.json();
     const bar = document.getElementById('alert-bar');
-    const relevant = d.features || [];
+    // Apply polygon filter: for warnings with a geometry (tornado, SVR, FFW),
+    // only show the alert if the user's point is actually inside the polygon.
+    // Watches and advisories have no geometry and pass through as-is.
+    const all = d.features || [];
+    const relevant = all.filter(f =>
+      alertPassesPolygonFilter(f, currentLocation.lat, currentLocation.lon)
+    );
     latestAlerts = relevant; // cache for the Morning Briefing, which avoids a duplicate fetch
     if (relevant.length > 0) {
       bar.classList.add('show');
-      bar.innerHTML = relevant.map(f => {
-        const p = f.properties;
-        const isTornado = /tornado/i.test(p.event);
-        if (isTornado) {
-          const tier = tornadoTier(p);
-          const tagHtml = tier.tagCls ? `<span class="tag-pill ${tier.tagCls}">${tier.tag}</span>` : '';
-          return `<div class="alert-item ${tier.cls}">
-            <span class="alert-pill">${p.event}</span>${tagHtml}
-            ${p.headline || p.description.slice(0,200)}
-          </div>`;
-        }
-        const sevClass = alertSeverityClass(p.event);
-        if (sevClass === 'sev-flood') {
-          const ftier = floodTier(p);
-          const ffe = hasFlashFloodEmergency(p);
-          const tagHtml = ftier.tagCls ? `<span class="tag-pill ${ftier.tagCls}">${ftier.tag}</span>` : '';
-          const ffeTagHtml = ffe ? `<span class="tag-pill tag-ffe">FLASH FLOOD EMERGENCY</span>` : '';
-          const hybridCls = ffe ? 'has-ffe' : '';
-          return `<div class="alert-item ${sevClass} ${ftier.cls} ${hybridCls}">
-            <span class="alert-pill">${p.event}</span>${tagHtml}${ffeTagHtml}
-            ${p.headline || p.description.slice(0,200)}
-          </div>`;
-        }
-        if (sevClass === 'sev-warning') {
-          const tstier = thunderstormTier(p);
-          const torPossible = hasTornadoPossible(p);
-          const tagHtml = tstier.tagCls ? `<span class="tag-pill ${tstier.tagCls}">${tstier.tag}</span>` : '';
-          const torTagHtml = torPossible ? `<span class="tag-pill tag-tor-possible">TORNADO POSSIBLE</span>` : '';
-          const hybridCls = torPossible ? 'has-tor-possible' : '';
-          return `<div class="alert-item ${sevClass} ${tstier.cls} ${hybridCls}">
-            <span class="alert-pill">${p.event}</span>${tagHtml}${torTagHtml}
-            ${p.headline || p.description.slice(0,200)}
-          </div>`;
-        }
-        return `<div class="alert-item ${sevClass}">
-          <span class="alert-pill">${p.event}</span>
-          ${p.headline || p.description.slice(0,200)}
-        </div>`;
-      }).join('');
-      updateNotifyBanner(relevant);
+      // Sort by severity before rendering so the most critical alert always
+      // appears first, regardless of the order the NWS API returns them in.
+      // This fixed a bug where a Severe Thunderstorm Warning (covering the
+      // same county zone) rendered before an active Tornado Warning simply
+      // because the STW happened to come first in the API response.
+      const sorted = [...relevant].sort((a, b) =>
+        alertSortPriority(a.properties.event, a.properties) - alertSortPriority(b.properties.event, b.properties)
+      );
+      currentAlertFeatures = sorted;
+      bar.innerHTML = sorted.map((f, i) => buildAlertHTML(f, i)).join('');
+      updateNotifyBanner(sorted);
     } else {
       bar.innerHTML = `<div class="alert-item all-clear"><span class="all-clear-dot"></span>No active weather alerts for ${currentLocation.displayName} and the surrounding area.</div>`;
       updateNotifyBanner([]);
@@ -1959,7 +2151,6 @@ let dismissedAlertKey = null;
 let latestAlerts = null; // cache of the most recent NWS alerts fetch, shared with the Morning Briefing
 let latestDaily = null; // cache of the most recent daily forecast, also shared with the Morning Briefing
 let latestCurrent = null;
-
 function updateNotifyBanner(relevant) {
   const banner = document.getElementById('notify-banner');
   const textEl = document.getElementById('notify-text');
@@ -2074,6 +2265,7 @@ async function loadLocation(loc) {
   latestAlerts = null;
   latestDaily = null;
   latestCurrent = null;
+  currentAlertFeatures = [];
 
   // Reveal app content, hide the locked state
   document.getElementById('locked-state').style.display = 'none';
