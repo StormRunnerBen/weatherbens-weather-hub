@@ -991,9 +991,11 @@
   }
   .day-card.open { border-color: rgba(77,184,255,0.4); }
   .day-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 40px 28px 1fr auto auto auto;
+    grid-template-rows: auto;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0 0.6rem;
     padding: 0.65rem 1rem;
     cursor: pointer;
     user-select: none;
@@ -1002,14 +1004,36 @@
   }
   .day-row:hover { background: rgba(77,184,255,0.07); }
   .day-row:active { background: rgba(77,184,255,0.12); }
-  .day-name { font-size: 0.82rem; font-weight: 500; min-width: 36px; }
-  .day-icon { font-size: 1.1rem; min-width: 26px; text-align: center; }
-  .day-desc { font-size: 0.78rem; color: var(--text-muted); flex: 1; min-width: 0; }
-  .day-rain { font-size: 0.75rem; color: var(--accent); min-width: 34px; text-align: right; }
+  .day-name {
+    font-size: 0.82rem;
+    font-weight: 500;
+    grid-column: 1;
+  }
+  .day-icon {
+    font-size: 1.1rem;
+    text-align: center;
+    grid-column: 2;
+  }
+  .day-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    grid-column: 3;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .day-rain {
+    font-size: 0.75rem;
+    color: var(--accent);
+    grid-column: 4;
+    white-space: nowrap;
+  }
   .day-temps {
     font-family: var(--mono);
     font-size: 0.82rem;
-    min-width: 72px;
+    grid-column: 5;
+    white-space: nowrap;
     text-align: right;
   }
   .day-lo { color: var(--text-muted); }
@@ -1017,8 +1041,7 @@
     font-size: 0.7rem;
     color: var(--text-muted);
     transition: transform 0.2s ease;
-    flex-shrink: 0;
-    margin-left: 0.1rem;
+    grid-column: 6;
   }
   .day-card.open .day-chevron { transform: rotate(180deg); }
   .day-tap-hint {
@@ -1026,10 +1049,28 @@
     color: var(--text-muted);
     opacity: 0.7;
     white-space: nowrap;
-    flex-shrink: 0;
     font-style: italic;
+    grid-column: 3 / 6;
+    padding-top: 0.1rem;
   }
   .day-card.open .day-tap-hint { display: none; }
+
+  /* Mobile: restructure into two clear rows so nothing squishes */
+  @media (max-width: 600px) {
+    .day-row {
+      grid-template-columns: 38px 26px 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 0.15rem 0.5rem;
+      padding: 0.6rem 0.85rem;
+    }
+    .day-name  { grid-column: 1; grid-row: 1; font-size: 0.8rem; }
+    .day-icon  { grid-column: 2; grid-row: 1; font-size: 1rem; }
+    .day-desc  { grid-column: 3; grid-row: 2; font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .day-rain  { grid-column: 3; grid-row: 1; font-size: 0.72rem; justify-self: start; }
+    .day-temps { grid-column: 4; grid-row: 1; font-size: 0.78rem; }
+    .day-chevron { grid-column: 4; grid-row: 2; justify-self: end; align-self: center; }
+    .day-tap-hint { display: none; } /* chevron is enough affordance on mobile */
+  }
   .day-detail {
     display: none;
     padding: 0 1rem 0.9rem;
