@@ -2104,8 +2104,8 @@ async function fetchAlerts() {
     // query only if the zone lookup itself fails for some reason.
     const zone = await lookupCountyZone(currentLocation.lat, currentLocation.lon);
     const alertsUrl = zone
-      ? `https://api.weather.gov/alerts/active?zone=${zone}&status=actual&message_type=alert`
-      : `https://api.weather.gov/alerts/active?point=${currentLocation.lat},${currentLocation.lon}&status=actual&message_type=alert`;
+      ? `https://api.weather.gov/alerts/active?zone=${zone}&status=actual&message_type=alert,update`
+      : `https://api.weather.gov/alerts/active?point=${currentLocation.lat},${currentLocation.lon}&status=actual&message_type=alert,update`;
     const res = await fetch(alertsUrl);
     const d = await res.json();
     const bar = document.getElementById('alert-bar');
@@ -2113,7 +2113,27 @@ async function fetchAlerts() {
     // only show the alert if the user's point is actually inside the polygon.
     // Watches and advisories have no geometry and pass through as-is.
     const all = d.features || [];
-    const relevant = all.filter(f =>
+    // Deduplicate: fetching message_type=alert,update can return both the
+    // original issuance and one or more SVS continuations for the same warning.
+    // The NWS references prior messages via properties.references — group by
+    // the root tracking ID and keep only the most recently sent version.
+    // Each feature's ID looks like: https://api.weather.gov/alerts/urn:oid:...
+    // and references earlier messages in the same event chain.
+    const latestByChain = new Map();
+    for (const f of all) {
+      // Use the first reference ID as the chain root, or the feature's own ID
+      // if it has no references (i.e. it is the original issuance).
+      const refs = f.properties.references || [];
+      const chainKey = refs.length > 0 ? refs[0]['@id'] || refs[0].id || f.id : f.id;
+      const existing = latestByChain.get(chainKey);
+      const thisSent = new Date(f.properties.sent || 0).getTime();
+      const prevSent = existing ? new Date(existing.properties.sent || 0).getTime() : -1;
+      if (!existing || thisSent > prevSent) {
+        latestByChain.set(chainKey, f);
+      }
+    }
+    const deduped = Array.from(latestByChain.values());
+    const relevant = deduped.filter(f =>
       alertPassesPolygonFilter(f, currentLocation.lat, currentLocation.lon)
     );
     latestAlerts = relevant; // cache for the Morning Briefing, which avoids a duplicate fetch
