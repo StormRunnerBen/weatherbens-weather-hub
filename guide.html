@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Use — WeatherBen's Weather Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #0a1628;
+    --sky-mid: #0f2040;
+    --sky-light: #1a3560;
+    --accent: #4db8ff;
+    --accent-warm: #f4a522;
+    --electric: #f5ff3d;
+    --danger: #ff4f4f;
+    --warning: #ffd23f;
+    --lavender: #b39ddb;
+    --success: #3ecf8e;
+    --text: #e8f0fe;
+    --text-muted: #8aa4cc;
+    --border: rgba(77, 184, 255, 0.18);
+    --card: rgba(15, 32, 64, 0.85);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--sky);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(77,184,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(244,165,34,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.25rem 4rem;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0 1rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .brand-name {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .brand-name .ben { color: var(--electric); }
+
+  .back-btn {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.3rem 0.65rem;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .back-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Hero ── */
+  .guide-hero {
+    padding: 2.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .guide-hero h1 {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .guide-hero p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    max-width: 580px;
+  }
+
+  /* ── Sections ── */
+  .guide-sections { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 2rem; }
+
+  .guide-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    padding: 1.1rem 1.3rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(77,184,255,0.04);
+  }
+  .section-title {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .section-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
+
+  .section-body {
+    padding: 1.2rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .section-body p {
+    font-size: 0.87rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .section-body p span.hl { color: var(--accent); font-weight: 500; }
+  .section-body p span.hl-warn { color: var(--electric); font-weight: 500; }
+  .section-body p span.hl-danger { color: var(--danger); font-weight: 500; }
+
+  /* ── Tip rows ── */
+  .tip {
+    padding: 0.65rem 0.85rem;
+    background: rgba(77,184,255,0.04);
+    border-radius: 7px;
+    border-left: 2px solid var(--accent);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+  /* ── Risk level table ── */
+  .risk-table { display: flex; flex-direction: column; gap: 0.4rem; }
+  .risk-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    background: rgba(255,255,255,0.03);
+  }
+  .risk-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    min-width: 50px;
+    text-align: center;
+    flex-shrink: 0;
+    color: #111;
+  }
+  .risk-name { font-weight: 500; min-width: 110px; flex-shrink: 0; }
+  .risk-desc { color: var(--text-muted); font-size: 0.78rem; }
+
+  /* ── Alert tier table ── */
+  .tier-table { display: flex; flex-direction: column; gap: 0.4rem; }
+  .tier-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+  }
+  .tier-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .tier-name { font-weight: 500; min-width: 120px; flex-shrink: 0; }
+  .tier-desc { color: var(--text-muted); font-size: 0.78rem; }
+
+  /* ── Divider ── */
+  .guide-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+  .guide-divider::before, .guide-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Footer ── */
+  .guide-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .guide-footer a {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.5rem 1.25rem;
+    transition: background 0.15s;
+  }
+  .guide-footer a:hover { background: rgba(77,184,255,0.1); }
+
+  @media (max-width: 600px) {
+    .guide-hero h1 { font-size: 1.3rem; }
+    .section-body { padding: 1rem; }
+    .section-header { padding: 0.9rem 1rem; }
+    .risk-name, .tier-name { min-width: 80px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="brand-name"><span class="ben">WeatherBen's</span> Weather Hub</span>
+    <a href="index.html" class="back-btn">← Back to Weather Hub</a>
+  </header>
+
+  <div class="guide-hero">
+    <h1>How to Use Weather Hub</h1>
+    <p>A quick walkthrough of every section in the app — what it shows, where the data comes from, and what to watch for during severe weather.</p>
+  </div>
+
+  <div class="guide-sections">
+
+    <!-- Searching -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">Searching for a Location</div>
+          <div class="section-subtitle">How to load weather data for any US city</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>Type a US city and state (e.g. <span class="hl">Nashville, TN</span>) into the search bar and press <span class="hl">Go</span> — or tap <span class="hl">Use My Location</span> to load weather for your current GPS position.</p>
+        <p>Your last-searched location is remembered automatically, so it reloads the next time you visit. You can also save favorites by clicking the star icon after searching.</p>
+        <div class="tip">
+          
+          <span>Including the state abbreviation (e.g. <strong>Paris, TX</strong> vs <strong>Paris, KY</strong>) ensures you get the right city when the name appears in multiple states.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Morning Briefing -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">Morning Briefing</div>
+          <div class="section-subtitle">A quick daily summary at the top of the page</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>The collapsible Morning Briefing card gives you a fast rundown before you scroll: today's conditions and high/low, tomorrow's outlook, current alert status, and a plain-English clothing suggestion.</p>
+        <p>Tap anywhere on the card header to expand or collapse it. The briefing updates automatically whenever weather or alert data refreshes — every 5 minutes for weather, every 60 seconds for alerts.</p>
+      </div>
+    </div>
+
+    <!-- Day at a Glance -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">Your Day at a Glance</div>
+          <div class="section-subtitle">Current conditions snapshot</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>The hero card shows the current temperature, feels-like, and a short description of today's outlook. Below it, the conditions grid breaks down wind speed and direction, humidity, dew point, UV index, and visibility — all updated every 5 minutes from <span class="hl">Open-Meteo</span>.</p>
+        <p>The <span class="hl">Past 24 Hours</span> precipitation chart shows hourly rainfall totals from the last day so you can get a sense of what's already fallen.</p>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">Active Severe Weather Alerts</div>
+          <div class="section-subtitle">Real-time NWS warnings, watches, and advisories</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>Alerts are pulled directly from the <span class="hl">National Weather Service</span> every 60 seconds. When multiple alerts are active, they're sorted by severity so the most critical warning always appears first.</p>
+        <p><span class="hl-warn">Tap any alert card</span> to see the full NWS report text, including the affected area, effective and expiration times, and the issuing forecast office. A link to the complete report on weather.gov is included at the bottom of each detail view.</p>
+
+        <div class="guide-divider">Tornado Warning Tiers</div>
+        <div class="tier-table">
+          <div class="tier-row" style="background:rgba(180,0,180,0.12)">
+            <div class="tier-dot" style="background:#cc00cc"></div>
+            <div class="tier-name">Tornado Emergency</div>
+            <div class="tier-desc">Extremely rare. Confirmed violent tornado with catastrophic damage expected. Take shelter immediately.</div>
+          </div>
+          <div class="tier-row" style="background:rgba(255,50,50,0.12)">
+            <div class="tier-dot" style="background:#ff3232"></div>
+            <div class="tier-name">PDS Tornado Warning</div>
+            <div class="tier-desc">Particularly Dangerous Situation. A large or very strong tornado is occurring or expected. Highest urgency short of an emergency.</div>
+          </div>
+          <div class="tier-row" style="background:rgba(200,30,30,0.12)">
+            <div class="tier-dot" style="background:#c81e1e"></div>
+            <div class="tier-name">Confirmed Tornado</div>
+            <div class="tier-desc">Tornado confirmed by spotters or radar. Radar-confirmed debris signatures or spotter reports indicate a tornado is on the ground.</div>
+          </div>
+          <div class="tier-row" style="background:rgba(160,0,0,0.1)">
+            <div class="tier-dot" style="background:#a00000"></div>
+            <div class="tier-name">Radar Indicated</div>
+            <div class="tier-desc">Tornado-producing rotation detected on radar. A tornado has not yet been confirmed visually but conditions are highly favorable.</div>
+          </div>
+        </div>
+
+        <div class="guide-divider">Alert Priority Order</div>
+        <p style="font-size:0.82rem; color:var(--text-muted);">When multiple alerts are active simultaneously, they appear in this order: Tornado Emergency → PDS Tornado Warning → Observed Tornado Warning → Tornado Warning → Destructive SVR Warning → Severe Thunderstorm Warning → Flash Flood Warning → Flood Warning → Tornado Watch → SVR Watch → Flash Flood Watch → Flood Watch → Flood Advisory.</p>
+
+        <div class="tip">
+          
+          <span>Polygon-based warnings (Tornado Warnings, SVR Warnings, Flash Flood Warnings) are filtered to your exact coordinates — if you're outside the warned polygon, the warning won't appear even if it covers part of your county. This is intentional and matches how the NWS targets these products.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Radar -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">Live Radar</div>
+          <div class="section-subtitle">NWS NEXRAD radar for your area</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>The radar panel loads the nearest NWS NEXRAD radar station automatically based on your location's forecast office (WFO). You can open it full-screen on weather.gov using the button below the radar view, or navigate to the full WFO page for additional products.</p>
+        <div class="tip">
+          
+          <span>Radar data has a built-in delay of a few minutes. For rapidly moving storms, always use the NWS full radar page alongside this tool rather than relying solely on the embedded view.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-Day Forecast -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">The Week Ahead</div>
+          <div class="section-subtitle">7-day forecast with expandable detail cards</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>Each day shows a high/low, precipitation probability, and a condition summary. <span class="hl-warn">Tap any day card</span> to expand it and see additional detail: feels-like range, total precipitation, rain and snow breakdown, max wind and gusts, UV index, and sunrise/sunset times.</p>
+        <p>On days forecast as thunderstorms, the expanded view shows the <span class="hl">SPC Convective Outlook</span> risk level for Days 1–3, pulled directly from the Storm Prediction Center. For Days 4–7, SPC categorical data isn't available, so only the model-derived condition is shown.</p>
+
+        <div class="guide-divider">SPC Risk Levels</div>
+        <div class="risk-table">
+          <div class="risk-row">
+            <span class="risk-badge" style="background:#c1e9c1">TSTM</span>
+            <span class="risk-name">General Thunder</span>
+            <span class="risk-desc">Storms possible, low organized severe risk</span>
+          </div>
+          <div class="risk-row">
+            <span class="risk-badge" style="background:#66a366; color:#fff">MRGL</span>
+            <span class="risk-name">Marginal</span>
+            <span class="risk-desc">Isolated severe storms possible</span>
+          </div>
+          <div class="risk-row">
+            <span class="risk-badge" style="background:#ffe066">SLGT</span>
+            <span class="risk-name">Slight</span>
+            <span class="risk-desc">Scattered severe storms expected</span>
+          </div>
+          <div class="risk-row">
+            <span class="risk-badge" style="background:#ffa366">ENH</span>
+            <span class="risk-name">Enhanced</span>
+            <span class="risk-desc">Numerous severe storms likely</span>
+          </div>
+          <div class="risk-row">
+            <span class="risk-badge" style="background:#e06666; color:#fff">MDT</span>
+            <span class="risk-name">Moderate</span>
+            <span class="risk-desc">Significant severe weather event expected</span>
+          </div>
+          <div class="risk-row">
+            <span class="risk-badge" style="background:#ee99ee">HIGH</span>
+            <span class="risk-name">High</span>
+            <span class="risk-desc">Particularly dangerous situation — rare</span>
+          </div>
+        </div>
+
+        <div class="tip">
+          <span class="tip-icon">⚠️</span>
+          <span>Forecast data comes from <strong>Open-Meteo</strong> weather models. Precipitation totals and storm labels are model estimates, not official NWS forecasts. Always monitor the NWS and check active alerts for the most accurate severe weather information.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data sources -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">Data Sources</div>
+          <div class="section-subtitle">Where the information comes from</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>Weather Hub pulls from multiple public, free, no-key-required data sources:</p>
+        <div class="tip" style="border-left-color:var(--accent)">
+          
+          <div><strong style="color:var(--accent)">Open-Meteo</strong> — current conditions, hourly forecast, 7-day daily forecast, precipitation history. Updated every 5 minutes in the app.</div>
+        </div>
+        <div class="tip" style="border-left-color:var(--danger)">
+          
+          <div><strong style="color:var(--danger)">National Weather Service (NWS)</strong> — severe weather alerts, radar, forecast office data. Alerts refresh every 60 seconds.</div>
+        </div>
+        <div class="tip" style="border-left-color:var(--electric)">
+          
+          <div><strong style="color:var(--electric)">Storm Prediction Center (SPC)</strong> — convective outlook risk levels for Days 1–3 on storm days. Fetched on each location search.</div>
+        </div>
+        <div class="tip" style="border-left-color:var(--text-muted)">
+          
+          <div><strong>BigDataCloud</strong> — reverse geocoding for the Use My Location feature only. Not used for any other requests.</div>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted);">Weather Hub is a personal project and is not affiliated with NOAA, NWS, or the Storm Prediction Center. Data is provided as-is. Always confirm severe weather information with official NWS sources.</p>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div id="disclaimer" class="guide-section" style="border-color: rgba(255,210,63,0.3);">
+      <div class="section-header" style="background: rgba(255,210,63,0.06); border-bottom-color: rgba(255,210,63,0.2);">
+        <div>
+          <div class="section-title" style="color: var(--warning);">Beta Tool — Important Disclaimer</div>
+          <div class="section-subtitle">Please read before relying on this tool for safety decisions</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p><strong>WeatherBen's Weather Hub is a personal project currently in beta testing.</strong> It is not an official source of weather information and is not affiliated with, endorsed by, or operated by the National Weather Service (NWS), NOAA, the Storm Prediction Center, or any government agency, news organization, or official weather provider.</p>
+        <p>Data displayed in this tool is sourced from publicly available third-party APIs including Open-Meteo, the NWS API, and the NOAA MapServer. While every effort is made to display this data accurately, <strong>no guarantees are made about the completeness, timeliness, or accuracy of any information shown.</strong></p>
+        <p>This tool is intended as a supplementary reference only. <span class="hl-warn">Do not use Weather Hub as your sole source of information during severe weather events.</span> Always consult official NWS products, your local forecast office, and emergency management authorities when severe weather threatens your area.</p>
+        <p>By using this tool, you acknowledge that it is provided as-is without warranty of any kind, and that the developer assumes no liability for decisions made based on information displayed here.</p>
+        <div class="tip" style="border-left-color: var(--warning); background: rgba(255,210,63,0.05);">
+          Official severe weather information is always available at <a href="https://www.weather.gov" target="_blank" rel="noopener" style="color:var(--accent)">weather.gov</a> and through the NWS wireless emergency alert system on your phone.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /guide-sections -->
+
+  <div class="guide-footer">
+    <p>Questions or feedback? This tool is a work in progress — check back for updates.</p>
+    <a href="index.html">← Back to Weather Hub</a>
+    <p style="font-size:0.72rem; max-width:520px; text-align:center; line-height:1.5;">WeatherBen's Weather Hub is a personal beta project. Not affiliated with NWS, NOAA, or any official weather agency. Not a substitute for official weather sources during emergencies.</p>
+  </div>
+
+</div><!-- /wrap -->
+</body>
+</html>
