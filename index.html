@@ -2239,7 +2239,11 @@ function clothingSuggestion(highF, lowF, code, rainProb, windMph) {
   // Rain gear is surfaced even at moderate probability (30%+) so users
   // aren't caught off guard by a shower on an otherwise mild day.
   if (isStorm) {
-    picks.push('Hold off on outdoor plans if storms are active — keep an eye on alerts below.');
+    if (heavyRain) {
+      picks.push('Storms likely today — bring a rain jacket or umbrella, and keep an eye on alerts below.');
+    } else {
+      picks.push('Storms possible today — keep an eye on alerts below and have a plan if they develop.');
+    }
   } else if (isSnow) {
     picks.push('Watch for slick roads and sidewalks if you\'re heading out.');
   } else if (heavyRain) {
