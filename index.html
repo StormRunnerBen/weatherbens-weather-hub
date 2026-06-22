@@ -2127,7 +2127,11 @@ function renderDaySummary(daily, current) {
 function clothingSuggestion(highF, lowF, code, rainProb, windMph) {
   const isStorm = [95, 96, 99].includes(code);
   const isSnow = [71, 73, 75, 77, 85, 86].includes(code);
-  const isRain = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) || rainProb >= 50;
+  // Count rain codes OR any meaningful rain probability (lowered to 30% —
+  // the daily max can stay below 50% even on noticeably rainy days when
+  // precipitation is scattered or intermittent rather than widespread).
+  const isRain = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) || rainProb >= 30;
+  const heavyRain = rainProb >= 60;
 
   const picks = [];
 
@@ -2143,12 +2147,17 @@ function clothingSuggestion(highF, lowF, code, rainProb, windMph) {
     picks.push('Comfortable layers — temps stay in a pretty easy range today.');
   }
 
+  // Second sentence: precipitation or weather-specific advice.
+  // Rain gear is surfaced even at moderate probability (30%+) so users
+  // aren't caught off guard by a shower on an otherwise mild day.
   if (isStorm) {
     picks.push('Hold off on outdoor plans if storms are active — keep an eye on alerts below.');
   } else if (isSnow) {
     picks.push('Watch for slick roads and sidewalks if you\'re heading out.');
+  } else if (heavyRain) {
+    picks.push('Good chance of rain today — a rain jacket or umbrella is a must.');
   } else if (isRain) {
-    picks.push('Bring a rain jacket or umbrella; outdoor plans may need a backup.');
+    picks.push('Rain is possible today, so a light rain jacket or umbrella is worth grabbing.');
   } else if (windMph >= 20) {
     picks.push('Breezy — secure anything loose outdoors and expect a windbreaker to help.');
   } else if (highF >= 60 && highF <= 85 && rainProb < 30) {
