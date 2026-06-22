@@ -13,11 +13,98 @@ The current tool is a fully functional, single-file weather app deployed on Netl
 - SPC Convective Outlook integration for Days 1–3 on storm days
 - Live NEXRAD radar via NWS
 - Morning Briefing summary card
-- Clickable 7-day forecast cards with expanded detail
-- Beta disclaimer and guide page
-- Severity-matched alert banner
+- Clickable 7-day forecast cards with expanded detail, including hail context
+- Severity-matched alert notification banner
+- Beta disclaimer, guide page, and Netlify Forms feedback form
+- Mobile-responsive layout
 
 No backend, no database, no API keys — everything runs client-side from a single HTML file.
+
+---
+
+## Planned Features (Near Term)
+
+These five features were identified as the highest-value additions that don't require a backend, use data already available in the app, and address the most common user needs.
+
+---
+
+### 1. Hourly Forecast View
+
+**Priority: High — biggest immediate user value**
+
+A scrollable hour-by-hour breakdown for the next 24–48 hours showing temperature, precipitation probability, wind speed/direction, and conditions. Open-Meteo already returns all of this data in the existing fetch — it's a display-only addition with no new API calls required.
+
+**Why it matters:** The 7-day cards show daily highs/lows but give no timing information. "Will it rain during my commute?" and "When does the storm arrive?" are the most common questions a weather tool gets asked that the current app can't answer.
+
+**Data available:** `hourly.temperature_2m`, `hourly.weather_code`, `hourly.precipitation_probability`, `hourly.precipitation`, `hourly.wind_speed_10m`, `hourly.wind_direction_10m` — all already fetched.
+
+**Implementation approach:** A horizontally scrollable strip beneath each expanded day card, or a dedicated hourly section between the current conditions and 7-day list. Tapping a day card could expand to show that day's hourly breakdown.
+
+**Estimated effort:** 1–2 days.
+
+---
+
+### 2. Saved Locations / Multi-Location Dashboard
+
+**Priority: High — lays groundwork for push notifications later**
+
+True saved locations where users can pin multiple cities (a family member's town, a vacation destination, a work commute point) and see their current conditions at a glance without re-searching each time.
+
+**Why it matters:** Favorites currently act as quick-search shortcuts, but users can only view one location at a time. A multi-location dashboard is how most people actually use weather tools — checking on family in a storm-affected area being the most immediate use case given this app's severe weather focus.
+
+**Implementation approach:** A pinned locations row below the search bar showing current temp and conditions for each saved city, pulling from Open-Meteo. Tap to load that location fully. localStorage handles persistence with no backend needed.
+
+**Future connection:** The saved locations list is also the natural starting point for push notification subscriptions — when that backend is built, each saved location becomes a location the user wants alerts for.
+
+**Estimated effort:** 2–3 days.
+
+---
+
+### 3. Feels-Like and Humidity Prominence
+
+**Priority: Medium — high user impact, low effort**
+
+Elevate the feels-like temperature as a primary display element alongside the actual temperature, rather than treating it as one of eight equal items in the conditions grid. Humidity and dew point could also be more visually prominent given how much they affect comfort, especially in summer.
+
+**Why it matters:** User feedback on weather apps consistently centers on "what does it actually feel like outside" as the most-used data point. The current app has this information but buries it. A small layout change would make it substantially more useful day-to-day without adding any complexity.
+
+**Data available:** Already fetched — `current.apparent_temperature`, `current.relative_humidity_2m`, `current.dew_point_2m`.
+
+**Implementation approach:** Show feels-like directly beneath or alongside the main temperature in the hero card. Could take the form of `72°F · Feels like 78°` as a subtitle rather than a grid cell.
+
+**Estimated effort:** Half a day.
+
+---
+
+### 4. Recent Storm Reports (SPC)
+
+**Priority: Medium — differentiating feature**
+
+After an active severe weather day, show nearby confirmed tornado, wind, and hail reports from the Storm Prediction Center's storm reports feed. This gives users context on what actually happened in their area after a storm event — something most consumer weather apps don't surface well.
+
+**Why it matters:** During and after events like the June 2026 Indiana tornado outbreak, users want to understand what occurred — was there a confirmed tornado? What was the path? The SPC publishes this data publicly and it's the same source meteorologists and storm spotters use.
+
+**Data source:** `https://www.spc.noaa.gov/climo/reports/` — publishes today's and recent days' tornado, wind, and hail reports as CSV/GeoJSON. No API key required. CORS policy will need verification before building.
+
+**Implementation approach:** A "Recent Storm Reports" section (below the alerts section, only visible when reports exist near the searched location) showing confirmed tornadoes, significant wind, and large hail events within a radius of the user's coordinates for the past 24–48 hours.
+
+**Estimated effort:** 2–3 days, with the main uncertainty being the SPC data format and CORS verification.
+
+---
+
+### 5. Winter Weather Precipitation Type Breakdown
+
+**Priority: Medium — high seasonal value for Midwest user base**
+
+A winter weather mode that distinguishes between snow, sleet, freezing rain, and mixed precipitation rather than labeling everything as "Light snow" or "Snow." Flags mixed precip risk and explains timing of transitions (e.g. "Rain changing to freezing rain after 6 PM").
+
+**Why it matters:** Winter weather is disproportionately dangerous relative to how much attention it gets in the app. A freezing rain event looks identical to a snow event in the current display. For users in Kentucky, Indiana, and Tennessee (where this app is being beta tested), ice storms are a significant recurring hazard.
+
+**Data available:** Open-Meteo already returns `rain_sum`, `showers_sum`, and `snowfall_sum` separately in the daily fetch. The hourly `freezing_level_height` variable (not currently fetched) would enable mixed precip detection.
+
+**Implementation approach:** On days where WMO codes suggest frozen or mixed precipitation, the expanded day card shows a precipitation type breakdown with rain/snow/sleet proportions. A "Winter Weather" flag would appear on cards where freezing rain or mixed conditions are modeled.
+
+**Estimated effort:** 2–3 days, including adding `freezing_level_height` to the hourly fetch.
 
 ---
 
@@ -188,38 +275,19 @@ PWA → Play Store TWA is a natural progression and relatively low-friction. App
 
 ---
 
-## User Feedback Integration
-
-A Google Form embedded in or linked from the app gives users a direct channel for bug reports and feature requests.
-
-### Options
-
-**Option A — Linked button** (lowest friction, already implemented)
-A visible "Send Feedback" button in the app opens the Google Form in a new tab. Simple, no maintenance.
-
-**Option B — Embedded modal**
-The form loads in an overlay within the app using a `<iframe>`. Keeps users on the page but Google Forms iframes can behave inconsistently on mobile.
-
-**Option C — Netlify Forms** (future consideration)
-If you ever move away from Google Forms, Netlify has built-in form handling — responses go to your Netlify dashboard with no backend needed. Relevant if you want more control over the data.
-
-### Suggested form questions
-
-- What device/browser are you using?
-- What were you trying to do when you ran into an issue?
-- How would you rate the accuracy of the severe weather alerts?
-- What feature would you most like to see added?
-- Any other feedback?
-
----
-
 ## Summary: Recommended Order of Operations
 
-1. **Now (or next session):** Add Google Form feedback link to the app
-2. **Near term:** Build the PWA (manifest + service worker + icons) — one weekend
-3. **If growth warrants it:** Add Play Store distribution via TWA
-4. **If growth warrants it:** Build the push notification backend
-5. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
+1. **Done:** Netlify Forms feedback form — live and collecting submissions
+2. **Next (any order, all no-backend):**
+   - Hourly forecast view — highest user value, easiest to build
+   - Feels-like prominence — half a day, immediate impact
+   - Saved locations / multi-location dashboard — lays push notification groundwork
+   - Recent SPC storm reports — differentiating feature, verify CORS first
+   - Winter weather precipitation breakdown — high seasonal value for Midwest users
+3. **Near term:** Build the PWA (manifest + service worker + icons) — one weekend
+4. **If growth warrants it:** Add Play Store distribution via TWA
+5. **If growth warrants it:** Build the push notification backend
+6. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
 
 ---
 
