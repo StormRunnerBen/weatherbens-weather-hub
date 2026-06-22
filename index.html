@@ -339,6 +339,70 @@
   }
   .location-suggestion-item .sugg-sub { color: var(--text-muted); font-size: 0.74rem; margin-left: 6px; }
 
+  /* ── Morning Briefing (collapsible) ── */
+  .briefing-card {
+    margin-top: 1rem;
+    border: 1px solid rgba(245,255,61,0.25);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(245,255,61,0.06), rgba(77,184,255,0.04));
+    overflow: hidden;
+  }
+  .briefing-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .briefing-toggle-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+  .briefing-toggle-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex: 1;
+    min-width: 0;
+  }
+  .briefing-toggle-sub {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    display: block;
+    margin-top: 0.15rem;
+  }
+  .briefing-chevron {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .briefing-card.open .briefing-chevron { transform: rotate(180deg); }
+  .briefing-body {
+    display: none;
+    padding: 0 1.1rem 1.1rem;
+  }
+  .briefing-card.open .briefing-body { display: block; }
+  .briefing-row {
+    display: flex;
+    gap: 0.7rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .briefing-row:first-child { border-top: none; }
+  .briefing-row-icon { font-size: 1.15rem; line-height: 1.3; flex-shrink: 0; width: 1.4rem; text-align: center; }
+  .briefing-row-text { font-size: 0.85rem; color: var(--text); line-height: 1.45; min-width: 0; }
+  .briefing-row-text .hl-temp { color: var(--electric); font-weight: 600; }
+  .briefing-row-text .hl-rain { color: var(--accent); font-weight: 600; }
+  .briefing-row-text strong { color: var(--text); }
+  @media (max-width: 600px) {
+    .briefing-toggle-label { font-size: 0.88rem; }
+    .briefing-row-text { font-size: 0.8rem; }
+  }
+
   /* ── Daily Summary Hero ── */
   .day-summary-card {
     display: flex;
@@ -562,6 +626,103 @@
   .alert-item.sev-flood .alert-pill { background: var(--success); color: #04342c; }
   .alert-item.ffw-considerable .alert-pill { background: #3ecf8e; color: #04342c; }
   .alert-item.ffw-catastrophic .alert-pill { background: #fff; color: #00321d; }
+
+  /* ── Clickable alerts + detail modal ── */
+  .alert-item.is-clickable {
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.1s;
+  }
+  .alert-item.is-clickable:hover { filter: brightness(1.12); }
+  .alert-item.is-clickable:active { transform: scale(0.995); }
+  .alert-item .alert-expand-hint {
+    display: block;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 0.3rem;
+  }
+  #alert-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 10, 20, 0.72);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4vh 1rem;
+    overflow-y: auto;
+  }
+  #alert-modal-overlay.show { display: flex; }
+  .alert-modal {
+    background: var(--bg, #0c1622);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    max-width: 640px;
+    width: 100%;
+    padding: 1.4rem 1.4rem 1.6rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .alert-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+  .alert-modal-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+  }
+  .alert-modal-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .alert-modal-close:hover { color: var(--text); border-color: var(--text-muted); }
+  .alert-modal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .alert-modal-meta strong { color: var(--text); font-weight: 500; }
+  .alert-modal-section { margin-bottom: 1.1rem; }
+  .alert-modal-section:last-child { margin-bottom: 0; }
+  .alert-modal-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+  .alert-modal-body {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+  .alert-modal-footer {
+    margin-top: 1.2rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+  .alert-modal-footer a { color: var(--accent); }
 
   /* ── Section headings ── */
   .section-label {
@@ -897,22 +1058,6 @@
   }
   .open-btn:hover { opacity: 0.85; box-shadow: 0 0 12px rgba(245,255,61,0.35); }
 
-  /* ── Area tiles ── */
-  .area-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.75rem;
-  }
-  .area-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.85rem 1rem;
-  }
-  .area-name { font-size: 0.8rem; font-weight: 500; margin-bottom: 0.2rem; }
-  .area-temp { font-family: var(--mono); font-size: 1.4rem; font-weight: 500; color: var(--accent); }
-  .area-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
-
   /* ── Footer ── */
   footer {
     margin-top: 2.5rem;
@@ -968,7 +1113,6 @@
   <!-- Location Search -->
   <div class="location-bar">
     <div class="location-input-wrap">
-      <span class="location-icon">📍</span>
       <input type="text" id="location-input" class="location-input" placeholder="Enter a US city and state (e.g. Nashville, TN)" autocomplete="off" />
       <button class="location-btn" id="location-btn" onclick="handleLocationSearch()">Go</button>
     </div>
@@ -979,7 +1123,7 @@
       <div class="divider-line-sm"></div>
     </div>
     <button class="geolocate-btn" id="geolocate-btn" onclick="handleUseMyLocation()">
-      <span class="geolocate-icon">🧭</span> Use My Location
+      Use My Location
     </button>
     <div class="location-status" id="location-status">Enter a city and state to load weather, alerts, and radar for your area.</div>
     <div class="location-suggestions" id="location-suggestions"></div>
@@ -994,6 +1138,20 @@
 
   <!-- Everything below is hidden until a location is loaded -->
   <div id="app-content" class="app-content-hidden">
+
+  <!-- Morning Briefing (collapsible, condensed daily readout) -->
+  <div class="briefing-card" id="briefing-card">
+    <button type="button" class="briefing-toggle" id="briefing-toggle" aria-expanded="false">
+      <span class="briefing-toggle-label">
+        Morning Briefing
+        <span class="briefing-toggle-sub" id="briefing-toggle-sub">Tap to see today's rundown</span>
+      </span>
+      <span class="briefing-chevron">▾</span>
+    </button>
+    <div class="briefing-body" id="briefing-body">
+      <div style="color:var(--text-muted); font-size:0.82rem;">Loading…</div>
+    </div>
+  </div>
 
   <!-- Section Divider: Your Day -->
   <div class="section-divider">
@@ -1042,14 +1200,6 @@
       <div class="precip-labels" id="precip-labels"></div>
     </div>
     <div class="precip-total" id="precip-total">Total: — in</div>
-  </div>
-
-  <!-- Surrounding Areas (auto-generated near the searched location) -->
-  <div id="surrounding-areas-section">
-    <p class="section-label">Surrounding Areas</p>
-    <div class="area-grid" id="area-grid">
-      <div style="color:var(--text-muted); font-size:0.82rem; grid-column:1/-1;">Loading…</div>
-    </div>
   </div>
 
   <!-- Section Divider: The Week Ahead -->
@@ -1132,6 +1282,7 @@
 // ── Clock ──
 // ── Global location state ──
 // No default location — page starts empty until the user searches.
+
 let currentLocation = null; // { name, admin1 (state), lat, lon, timezone }
 
 function updateClock() {
@@ -1169,106 +1320,17 @@ const msToMph = v => Math.round(v * 2.23694);
 const cToF = v => Math.round(v * 9/5 + 32);
 const kmToMi = v => (v * 0.621371).toFixed(1);
 
-// ── Nearby town discovery (works for any US location) ──
-// Strategy: probe a ring of points ~15-20 miles out from the searched
-// location at 6 compass bearings, reverse-geocode each via Nominatim to
-// find the nearest named place, then dedupe against the searched city
-// itself and against each other. This replaces the old Bowling Green-only
-// hardcoded list with something that works anywhere in the US.
+// ── Place name cleanup ──
 // Strips administrative civil-division prefixes that some states (notably
-// Wisconsin, Minnesota, Michigan) use in OSM data for unincorporated
+// Wisconsin, Minnesota, Michigan) use in geocoding data for unincorporated
 // townships — e.g. "Town of Primrose" → "Primrose", "Charter Township of
 // Canton" → "Canton". These aren't how anyone actually refers to a place,
 // so we normalize them to match how cities/villages are already shown.
+// Used by reverseGeocode() for the "Use My Location" feature.
 function cleanPlaceName(name) {
   return name
     .replace(/^(Town|Township|Charter Township|City|Village) of\s+/i, '')
     .trim();
-}
-
-function offsetCoord(lat, lon, distanceMiles, bearingDeg) {
-  const R = 3958.8; // Earth radius in miles
-  const bearing = bearingDeg * Math.PI / 180;
-  const lat1 = lat * Math.PI / 180;
-  const lon1 = lon * Math.PI / 180;
-  const d = distanceMiles / R;
-
-  const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(bearing));
-  const lon2 = lon1 + Math.atan2(
-    Math.sin(bearing) * Math.sin(d) * Math.cos(lat1),
-    Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
-  );
-
-  return { lat: lat2 * 180 / Math.PI, lon: lon2 * 180 / Math.PI };
-}
-
-// ⚠️ KNOWN ISSUE: this function uses Nominatim in a "systematic grid query"
-// pattern (multiple reverse-geocode probes around a computed point), which
-// Nominatim's usage policy explicitly disallows regardless of request
-// pacing. This has resulted in our requests being blocked. This needs a
-// proper replacement (a provider that supports batch/grid-style lookups
-// without violating its terms) — flagged here rather than silently retried.
-async function findNearbyTowns(lat, lon, originName) {
-  const bearings = [0, 60, 120, 180, 240, 300]; // 6 directions around the compass
-  const radii = [8, 16]; // probe both a close ring and a farther ring per bearing
-
-  const points = [];
-  for (const r of radii) {
-    for (const b of bearings) {
-      points.push(offsetCoord(lat, lon, r, b));
-    }
-  }
-
-  // Nominatim's fair-use policy expects roughly 1 request/second, not a
-  // burst of parallel calls. Firing all 12 probes simultaneously (the old
-  // approach) risked tripping rate limiting and silently zeroing out every
-  // result at once. Run them sequentially with a short delay between each
-  // instead — slower, but reliable.
-  const towns = [];
-  for (const p of points) {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${p.lat}&lon=${p.lon}&format=json&zoom=14&addressdetails=1`, {
-        headers: { 'Accept-Language': 'en' }
-      });
-      const d = await res.json();
-      const addr = d.address || {};
-      if (addr.country_code === 'us') {
-        // Only accept actual named settlements — never a county, region, or
-        // other administrative-only label. Skip the point if none present.
-        const rawName = addr.city || addr.town || addr.village || addr.suburb || addr.hamlet;
-        if (rawName) {
-          const name = cleanPlaceName(rawName);
-          const stateName = addr.state ? usStateAbbr(addr.state) : '';
-          towns.push({ name, state: stateName, lat: p.lat, lon: p.lon });
-        }
-      }
-    } catch (e) {
-      // Skip this probe point on failure (network error, rate limit, etc.)
-      // and continue with the rest rather than aborting the whole search.
-    }
-    await new Promise(resolve => setTimeout(resolve, 250)); // ~4 req/sec, well under typical fair-use limits
-  }
-
-  // Prefer closer towns first — important now that we probe two radii,
-  // so a near neighbor (like Madison from Verona) wins over a farther one
-  // that happens to come from a later probe point.
-  towns.forEach(t => {
-    t.distance = Math.sqrt((t.lat - lat) ** 2 + (t.lon - lon) ** 2);
-  });
-  towns.sort((a, b) => a.distance - b.distance);
-
-  // Dedupe by name (different bearings/radii can resolve to the same town)
-  // and exclude the searched location itself.
-  const seen = new Set([originName.toLowerCase()]);
-  const deduped = [];
-  for (const t of towns) {
-    const key = t.name.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    deduped.push(t);
-  }
-
-  return deduped.slice(0, 6);
 }
 
 // ── Fetch current + forecast for the active location ──
@@ -1290,6 +1352,9 @@ async function fetchWeather() {
     renderDaily(d.daily);
     renderPrecipHistory(d.hourly);
     renderDaySummary(d.daily, d.current);
+    latestDaily = d.daily; // cached so the Morning Briefing can re-render once alerts arrive
+    latestCurrent = d.current;
+    renderBriefing(latestDaily, latestCurrent);
     document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('en-US', { timeZone: currentLocation.timezone, hour:'numeric', minute:'2-digit' });
   } catch(e) {
     console.error('fetchWeather failed:', e);
@@ -1500,9 +1565,14 @@ function renderDaily(d) {
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const container = document.getElementById('daily-list');
   container.innerHTML = '';
-  for (let i = 0; i < d.time.length; i++) {
+  // d.time[0] is yesterday — the API call uses past_days=1 (needed for the
+  // "Past 24 Hours" precip chart), which prepends one day to the *daily*
+  // array too, not just hourly. Skip it here so "Today" actually lines up
+  // with today instead of showing yesterday mislabeled as Today, followed
+  // by today under its real weekday name (e.g. a duplicate "Sunday" row).
+  for (let i = 1; i < d.time.length; i++) {
     const dt = new Date(d.time[i] + 'T12:00:00');
-    const dayName = i === 0 ? 'Today' : days[dt.getDay()];
+    const dayName = i === 1 ? 'Today' : days[dt.getDay()];
     const [desc, icon] = wmoInfo(d.weather_code[i]);
     const row = document.createElement('div');
     row.className = 'day-row';
@@ -1591,10 +1661,12 @@ function pickSummary(code, rainProb, highF) {
 }
 
 function renderDaySummary(daily, current) {
-  const highF = Math.round(daily.temperature_2m_max[0]);
-  const lowF = Math.round(daily.temperature_2m_min[0]);
-  const rainProb = daily.precipitation_probability_max[0];
-  const code = daily.weather_code[0];
+  // index 0 is yesterday (past_days=1 prepends it for the precip chart) —
+  // today is index 1. See the matching note in renderDaily.
+  const highF = Math.round(daily.temperature_2m_max[1]);
+  const lowF = Math.round(daily.temperature_2m_min[1]);
+  const rainProb = daily.precipitation_probability_max[1];
+  const code = daily.weather_code[1];
 
   const { icon, line } = pickSummary(code, rainProb, highF);
 
@@ -1604,48 +1676,115 @@ function renderDaySummary(daily, current) {
     `Currently ${Math.round(current.temperature_2m)}°F · Today's range ${lowF}°–${highF}° · ${currentLocation.displayName}`;
 }
 
-// ── Fetch area temps (Bowling Green only — hidden for other locations) ──
-async function fetchAreas() {
-  const section = document.getElementById('surrounding-areas-section');
-  const grid = document.getElementById('area-grid');
-  section.style.display = '';
-  grid.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; grid-column:1/-1;">Finding nearby areas…</div>';
+// ── Morning Briefing: condensed today + tomorrow + alerts + what-to-wear ──
+// Reuses the same daily/current payload already fetched for the rest of
+// the page (no extra network call) and the alerts cached by fetchAlerts().
+function clothingSuggestion(highF, lowF, code, rainProb, windMph) {
+  const isStorm = [95, 96, 99].includes(code);
+  const isSnow = [71, 73, 75, 77, 85, 86].includes(code);
+  const isRain = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) || rainProb >= 50;
 
-  let towns;
-  try {
-    towns = await findNearbyTowns(currentLocation.lat, currentLocation.lon, currentLocation.name);
-  } catch (e) {
-    towns = [];
+  const picks = [];
+
+  if (isSnow || lowF <= 20) {
+    picks.push('Heavy coat, gloves, and a hat — it\'s genuinely cold out there.');
+  } else if (lowF <= 35) {
+    picks.push('A warm coat and layers — chilly morning, especially early on.');
+  } else if (highF >= 90) {
+    picks.push('Light, breathable clothes and water on hand — it\'ll be a hot one.');
+  } else if (highF <= 55) {
+    picks.push('A jacket or warm layer is a good call today.');
+  } else {
+    picks.push('Comfortable layers — temps stay in a pretty easy range today.');
   }
 
-  if (towns.length === 0) {
-    grid.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; grid-column:1/-1;">Surrounding areas are temporarily unavailable. This section is being rebuilt on a more reliable data source.</div>';
-    return;
+  if (isStorm) {
+    picks.push('Hold off on outdoor plans if storms are active — keep an eye on alerts below.');
+  } else if (isSnow) {
+    picks.push('Watch for slick roads and sidewalks if you\'re heading out.');
+  } else if (isRain) {
+    picks.push('Bring a rain jacket or umbrella; outdoor plans may need a backup.');
+  } else if (windMph >= 20) {
+    picks.push('Breezy — secure anything loose outdoors and expect a windbreaker to help.');
+  } else if (highF >= 60 && highF <= 85 && rainProb < 30) {
+    picks.push('Solid conditions for being outside today if you\'ve got something planned.');
   }
 
-  grid.innerHTML = '';
-  const results = await Promise.allSettled(towns.map(area => {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${area.lat}&longitude=${area.lon}`
-      + `&current=temperature_2m,weather_code,wind_speed_10m`
-      + `&temperature_unit=fahrenheit&wind_speed_unit=mph`
-      + `&timezone=${encodeURIComponent(currentLocation.timezone)}`;
-    return fetch(url).then(r => r.json()).then(d => ({ ...area, data: d.current }));
-  }));
-
-  results.forEach(r => {
-    if (r.status !== 'fulfilled') return;
-    const { name, state, data } = r.value;
-    const [desc] = wmoInfo(data.weather_code);
-    const card = document.createElement('div');
-    card.className = 'area-card';
-    card.innerHTML = `
-      <div class="area-name">${name}${state ? ', ' + state : ''}</div>
-      <div class="area-temp">${Math.round(data.temperature_2m)}°F</div>
-      <div class="area-meta">${desc} · Wind ${Math.round(data.wind_speed_10m)} mph</div>
-    `;
-    grid.appendChild(card);
-  });
+  return picks.join(' ');
 }
+
+function renderBriefing(daily, current) {
+  const body = document.getElementById('briefing-body');
+  const sub = document.getElementById('briefing-toggle-sub');
+  // index 0 is yesterday (past_days=1 prepends it for the precip chart),
+  // so today is index 1 and tomorrow is index 2 — need at least 3 entries.
+  if (!daily || !daily.time || daily.time.length < 3) return;
+
+  const todayHigh = Math.round(daily.temperature_2m_max[1]);
+  const todayLow = Math.round(daily.temperature_2m_min[1]);
+  const todayRain = daily.precipitation_probability_max[1];
+  const todayCode = daily.weather_code[1];
+  const [todayDesc] = wmoInfo(todayCode);
+
+  const tmrwHigh = Math.round(daily.temperature_2m_max[2]);
+  const tmrwLow = Math.round(daily.temperature_2m_min[2]);
+  const tmrwRain = daily.precipitation_probability_max[2];
+  const tmrwCode = daily.weather_code[2];
+  const [tmrwDesc] = wmoInfo(tmrwCode);
+
+  const windMph = current ? Math.round(current.wind_speed_10m) : 0;
+
+  sub.textContent = `${todayHigh}° / ${todayLow}° today · ${todayDesc}`;
+
+  const rows = [];
+
+  rows.push(`
+    <div class="briefing-row">
+      <span class="briefing-row-text"><strong>Today:</strong> ${todayDesc.toLowerCase()}, high <span class="hl-temp">${todayHigh}°</span>, low ${todayLow}° · <span class="hl-rain">${todayRain}% chance of rain</span></span>
+    </div>`);
+
+  rows.push(`
+    <div class="briefing-row">
+      <span class="briefing-row-text"><strong>Tomorrow:</strong> ${tmrwDesc.toLowerCase()}, high <span class="hl-temp">${tmrwHigh}°</span>, low ${tmrwLow}° · <span class="hl-rain">${tmrwRain}% chance of rain</span></span>
+    </div>`);
+
+  // Alerts: use the cached fetch from fetchAlerts() rather than hitting the
+  // NWS API again. null means we haven't successfully fetched yet (or the
+  // last attempt failed) — distinguish that from a confirmed empty list.
+  if (latestAlerts === null) {
+    rows.push(`
+      <div class="briefing-row">
+        <span class="briefing-row-text">Alert status unavailable right now — check the alerts section below.</span>
+      </div>`);
+  } else if (latestAlerts.length > 0) {
+    const names = [...new Set(latestAlerts.map(f => f.properties.event))];
+    rows.push(`
+      <div class="briefing-row">
+        <span class="briefing-row-text"><strong>Active alerts:</strong> ${names.join(', ')} — see details below.</span>
+      </div>`);
+  } else {
+    rows.push(`
+      <div class="briefing-row">
+        <span class="briefing-row-text">No active weather alerts right now.</span>
+      </div>`);
+  }
+
+  const suggestion = clothingSuggestion(todayHigh, todayLow, todayCode, todayRain, windMph);
+  rows.push(`
+    <div class="briefing-row">
+      <span class="briefing-row-text"><strong>What to wear:</strong> ${suggestion}</span>
+    </div>`);
+
+  body.innerHTML = rows.join('');
+}
+
+function toggleBriefing() {
+  const card = document.getElementById('briefing-card');
+  const toggle = document.getElementById('briefing-toggle');
+  const isOpen = card.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+document.getElementById('briefing-toggle').addEventListener('click', toggleBriefing);
 
 // ── Classify alert severity by event name ──
 // Tornado Warnings get 4 escalating tiers (red family):
@@ -1717,13 +1856,46 @@ function alertSeverityClass(event) {
 // ── Fetch NWS alerts ──
 // Uses NWS's point-based alert query (lat,lon) instead of a county regex,
 // so this works automatically for any US location without per-location config.
+// Resolves the county UGC zone (e.g. "WIC025") for a lat/lon via the NWS
+// /points/ endpoint. Per NWS's own geolocation guidance (weather.gov/media/
+// documentation/docs/NWS_Geolocation.pdf), small-polygon county-based
+// products — Tornado Warning, Severe Thunderstorm Warning, Flash Flood
+// Warning, etc. — are the ones most likely to be missed by a plain point
+// query, and the documented fix is to query by county zone instead.
+// IMPORTANT: properties.county sits directly under properties (a sibling of
+// relativeLocation), NOT nested inside relativeLocation.properties — that
+// was incorrectly assumed in an earlier version of this code and silently
+// broke the lookup. Verified directly against a full, unparaphrased NWS API
+// response (github.com/weather-gov/api/discussions/478) before reapplying.
+async function lookupCountyZone(lat, lon) {
+  try {
+    const res = await fetch(`https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`);
+    const d = await res.json();
+    const countyUrl = d.properties?.county; // e.g. "https://api.weather.gov/zones/county/WIC025"
+    if (!countyUrl) return null;
+    const match = countyUrl.match(/county\/([A-Z0-9]+)$/);
+    return match ? match[1] : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 async function fetchAlerts() {
   if (!currentLocation) return;
   try {
-    const res = await fetch(`https://api.weather.gov/alerts/active?point=${currentLocation.lat},${currentLocation.lon}&status=actual&message_type=alert`);
+    // Query by county zone rather than raw point — point queries can miss
+    // small-polygon warnings (tornadoes, severe thunderstorms, flash floods)
+    // due to how NWS geolocates those product types. Fall back to point
+    // query only if the zone lookup itself fails for some reason.
+    const zone = await lookupCountyZone(currentLocation.lat, currentLocation.lon);
+    const alertsUrl = zone
+      ? `https://api.weather.gov/alerts/active?zone=${zone}&status=actual&message_type=alert`
+      : `https://api.weather.gov/alerts/active?point=${currentLocation.lat},${currentLocation.lon}&status=actual&message_type=alert`;
+    const res = await fetch(alertsUrl);
     const d = await res.json();
     const bar = document.getElementById('alert-bar');
     const relevant = d.features || [];
+    latestAlerts = relevant; // cache for the Morning Briefing, which avoids a duplicate fetch
     if (relevant.length > 0) {
       bar.classList.add('show');
       bar.innerHTML = relevant.map(f => {
@@ -1771,9 +1943,11 @@ async function fetchAlerts() {
       updateNotifyBanner([]);
     }
   } catch(e) {
+    latestAlerts = null; // unknown state — briefing should say so rather than show stale alerts
     const bar = document.getElementById('alert-bar');
     bar.innerHTML = `<div class="alert-item all-clear"><span class="all-clear-dot" style="background:var(--text-muted); box-shadow:none;"></span>Couldn't reach the alerts feed. Check NWS directly if severe weather is suspected.</div>`;
   }
+  if (latestDaily) renderBriefing(latestDaily, latestCurrent); // refresh briefing now that alert status is known
 }
 
 // ── Top notification banner ──
@@ -1782,6 +1956,9 @@ async function fetchAlerts() {
 // (no browser storage used, per artifact constraints) so it won't keep
 // re-popping if the user already closed it for the same set of alerts.
 let dismissedAlertKey = null;
+let latestAlerts = null; // cache of the most recent NWS alerts fetch, shared with the Morning Briefing
+let latestDaily = null; // cache of the most recent daily forecast, also shared with the Morning Briefing
+let latestCurrent = null;
 
 function updateNotifyBanner(relevant) {
   const banner = document.getElementById('notify-banner');
@@ -1894,6 +2071,9 @@ async function loadLocation(loc) {
     displayName
   };
   dismissedAlertKey = null; // fresh location, don't carry over a prior dismissal
+  latestAlerts = null;
+  latestDaily = null;
+  latestCurrent = null;
 
   // Reveal app content, hide the locked state
   document.getElementById('locked-state').style.display = 'none';
@@ -1916,7 +2096,6 @@ async function loadLocation(loc) {
 
   // Kick off all data fetches
   fetchWeather();
-  fetchAreas();
   fetchAlerts();
   checkRadar();
 
@@ -2196,7 +2375,7 @@ async function handleUseMyLocation() {
   }
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="geolocate-icon">🧭</span> Locating…';
+  btn.innerHTML = 'Locating…';
   status.classList.remove('error');
   status.textContent = 'Requesting your location — check for a browser permission prompt.';
   suggestions.innerHTML = '';
@@ -2211,7 +2390,7 @@ async function handleUseMyLocation() {
           status.classList.add('error');
           status.textContent = "Could not match your location to a US city. Try searching by city and state instead.";
           btn.disabled = false;
-          btn.innerHTML = '<span class="geolocate-icon">🧭</span> Use My Location';
+          btn.innerHTML = 'Use My Location';
           return;
         }
         await loadLocation(loc);
@@ -2220,7 +2399,7 @@ async function handleUseMyLocation() {
         status.textContent = 'Could not look up your location right now. Try searching by city and state instead.';
       }
       btn.disabled = false;
-      btn.innerHTML = '<span class="geolocate-icon">🧭</span> Use My Location';
+      btn.innerHTML = 'Use My Location';
     },
     (err) => {
       status.classList.add('error');
@@ -2230,7 +2409,7 @@ async function handleUseMyLocation() {
         status.textContent = 'Could not determine your location. Try searching by city and state instead.';
       }
       btn.disabled = false;
-      btn.innerHTML = '<span class="geolocate-icon">🧭</span> Use My Location';
+      btn.innerHTML = 'Use My Location';
     },
     { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
   );
