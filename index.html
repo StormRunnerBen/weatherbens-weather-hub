@@ -632,13 +632,22 @@
     cursor: pointer;
     transition: filter 0.15s, transform 0.1s;
   }
-  .alert-item.is-clickable:hover { filter: brightness(1.12); }
+  .alert-item.is-clickable:hover { filter: brightness(1.15); outline: 1px solid rgba(255,255,255,0.15); }
   .alert-item.is-clickable:active { transform: scale(0.995); }
   .alert-item .alert-expand-hint {
-    display: block;
-    font-size: 0.7rem;
-    opacity: 0.7;
-    margin-top: 0.3rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    opacity: 0.85;
+    margin-top: 0.35rem;
+    font-style: italic;
+    letter-spacing: 0.01em;
+  }
+  .alert-item .alert-expand-hint::before {
+    content: '↗';
+    font-style: normal;
+    font-size: 0.8rem;
   }
   #alert-modal-overlay {
     display: none;
@@ -988,11 +997,13 @@
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    transition: background 0.12s;
   }
-  .day-row:hover { background: rgba(77,184,255,0.04); }
+  .day-row:hover { background: rgba(77,184,255,0.07); }
+  .day-row:active { background: rgba(77,184,255,0.12); }
   .day-name { font-size: 0.82rem; font-weight: 500; min-width: 36px; }
   .day-icon { font-size: 1.1rem; min-width: 26px; text-align: center; }
-  .day-desc { font-size: 0.78rem; color: var(--text-muted); flex: 1; }
+  .day-desc { font-size: 0.78rem; color: var(--text-muted); flex: 1; min-width: 0; }
   .day-rain { font-size: 0.75rem; color: var(--accent); min-width: 34px; text-align: right; }
   .day-temps {
     font-family: var(--mono);
@@ -1009,6 +1020,15 @@
     margin-left: 0.1rem;
   }
   .day-card.open .day-chevron { transform: rotate(180deg); }
+  .day-tap-hint {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-style: italic;
+  }
+  .day-card.open .day-tap-hint { display: none; }
   .day-detail {
     display: none;
     padding: 0 1rem 0.9rem;
@@ -1828,6 +1848,7 @@ function renderDaily(d) {
         <span class="day-desc">${displayDesc}</span>
         <span class="day-rain">${rainPct}%🌧</span>
         <span class="day-temps">${hiF}° <span class="day-lo">/ ${loF}°</span></span>
+        <span class="day-tap-hint">tap for details</span>
         <span class="day-chevron">▾</span>
       </div>
       <div class="day-detail">
