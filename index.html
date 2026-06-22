@@ -59,13 +59,14 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    background: #fff4c2;
-    color: #4a3c00;
+    background: var(--nb-bg, #fff4c2);
+    color: var(--nb-text, #4a3c00);
     padding: 0.65rem 1.25rem;
     font-size: 0.85rem;
     font-weight: 500;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
     animation: notify-slide-down 0.35s ease-out;
+    transition: background 0.3s, color 0.3s;
   }
   .notify-banner.show { display: flex; }
   @keyframes notify-slide-down {
@@ -78,8 +79,8 @@
     font-family: var(--mono);
     font-size: 0.76rem;
     font-weight: 600;
-    color: #fff4c2;
-    background: #4a3c00;
+    color: var(--nb-btn-text, #fff4c2);
+    background: var(--nb-btn-bg, #4a3c00);
     border: none;
     border-radius: 5px;
     padding: 0.4rem 0.8rem;
@@ -92,7 +93,7 @@
   .notify-dismiss {
     background: transparent;
     border: none;
-    color: #4a3c00;
+    color: var(--nb-text, #4a3c00);
     opacity: 0.6;
     font-size: 0.9rem;
     cursor: pointer;
@@ -1210,7 +1211,7 @@
       <span class="brand-sub" id="location-label">Search for a location</span>
     </div>
     <div style="display:flex; align-items:center; gap:1.25rem;">
-      <a href="guide.html" style="font-size:0.75rem; color:var(--text-muted); text-decoration:none; border:1px solid var(--border); border-radius:5px; padding:0.3rem 0.65rem; white-space:nowrap; transition:color 0.15s, border-color 0.15s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='var(--border)'">How to Use ↗</a>
+      <a href="guide.html" style="font-size:0.75rem; font-weight:600; color:#111; background:var(--electric); text-decoration:none; border-radius:5px; padding:0.3rem 0.75rem; white-space:nowrap; transition:opacity 0.15s; font-family:var(--mono);" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">How to Use ↗</a>
       <div class="header-time">
         <div id="clock">—</div>
         <div style="font-size:0.72rem; margin-top:2px;" id="clock-tz"></div>
@@ -1390,6 +1391,14 @@
     <a class="radar-btn" style="font-size:0.75rem;" id="link-wfo" href="https://www.weather.gov/" target="_blank">Local Forecast Office ↗</a>
     <a class="radar-btn" style="font-size:0.75rem;" href="https://web.weatherwise.app/" target="_blank">WeatherWise Web ↗</a>
     <a class="radar-btn" style="font-size:0.75rem;" href="https://www.spc.noaa.gov/" target="_blank">Storm Prediction Center ↗</a>
+  </div>
+
+  <!-- Disclaimer -->
+  <div style="margin-top:2rem; padding:1.1rem 1.3rem; background:rgba(255,210,63,0.06); border:1px solid rgba(255,210,63,0.3); border-radius:10px;">
+    <div style="font-family:var(--mono); font-size:0.82rem; font-weight:500; color:var(--warning); margin-bottom:0.6rem;">Beta Tool — Important Disclaimer</div>
+    <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.6; margin-bottom:0.5rem;"><strong style="color:var(--text);">WeatherBen's Weather Hub is a personal project currently in beta testing.</strong> It is not an official source of weather information and is not affiliated with, endorsed by, or operated by the National Weather Service (NWS), NOAA, the Storm Prediction Center, or any government agency, news organization, or official weather provider.</p>
+    <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.6; margin-bottom:0.5rem;">Data is sourced from publicly available third-party APIs. No guarantees are made about the completeness, timeliness, or accuracy of any information shown. <strong style="color:var(--warning);">Do not use this tool as your sole source of information during severe weather events.</strong> Always consult official NWS products and emergency management authorities.</p>
+    <p style="font-size:0.78rem; color:var(--text-muted); line-height:1.5;">Official information is always available at <a href="https://www.weather.gov" target="_blank" rel="noopener" style="color:var(--accent);">weather.gov</a>. By using this tool, you acknowledge it is provided as-is without warranty, and the developer assumes no liability for decisions made based on information displayed here. <a href="guide.html#disclaimer" style="color:var(--accent);">Full disclaimer ↗</a></p>
   </div>
 
   <footer>
@@ -2439,6 +2448,45 @@ let dismissedAlertKey = null;
 let latestAlerts = null; // cache of the most recent NWS alerts fetch, shared with the Morning Briefing
 let latestDaily = null; // cache of the most recent daily forecast, also shared with the Morning Briefing
 let latestCurrent = null;
+// Banner color themes keyed by alert tier.
+// Each theme: bg (banner background), text (banner text), btnBg, btnText.
+const BANNER_THEMES = {
+  'tor-emergency': { bg: '#4a0050', text: '#f9d0fc', btnBg: '#cc00cc', btnText: '#fff' },
+  'tor-pds':       { bg: '#5c0000', text: '#ffd5d5', btnBg: '#cc0000', btnText: '#fff' },
+  'tor-confirmed': { bg: '#6b1010', text: '#ffe8e8', btnBg: '#b01a1a', btnText: '#fff' },
+  'tor-radar':     { bg: '#7a1a00', text: '#ffd8c8', btnBg: '#c03000', btnText: '#fff' },
+  'sev-warning':   { bg: '#3d3000', text: '#fff3a0', btnBg: '#998000', btnText: '#111' },
+  'sev-flood':     { bg: '#003d1a', text: '#b8f5c8', btnBg: '#00803a', btnText: '#fff' },
+  'watch':         { bg: '#2d2d00', text: '#ffe87a', btnBg: '#666600', btnText: '#fff' },
+  'default':       { bg: '#fff4c2', text: '#4a3c00', btnBg: '#4a3c00', btnText: '#fff4c2' },
+};
+
+function notifyThemeForAlert(f) {
+  const p = f.properties;
+  const event = (p.event || '').toUpperCase();
+  const params = p.parameters || {};
+  const damageThreat = ((params.tornadoDamageThreat || [])[0] || '').toUpperCase();
+  const text = ((p.description || '') + ' ' + (p.headline || '')).toUpperCase();
+
+  if (/TORNADO/.test(event)) {
+    if (damageThreat === 'CATASTROPHIC' || /TORNADO EMERGENCY/.test(event) || /TORNADO EMERGENCY/.test(text))
+      return BANNER_THEMES['tor-emergency'];
+    if (damageThreat === 'CONSIDERABLE' || /PARTICULARLY DANGEROUS SITUATION/.test(text))
+      return BANNER_THEMES['tor-pds'];
+    const detection = ((params.tornadoDetection || [])[0] || '').toUpperCase();
+    if (detection === 'OBSERVED' || /\bOBSERVED\b/.test(text))
+      return BANNER_THEMES['tor-confirmed'];
+    return BANNER_THEMES['tor-radar'];
+  }
+  if (/SEVERE THUNDERSTORM WARNING|FLASH FLOOD WARNING|FLOOD WARNING/.test(event))
+    return BANNER_THEMES['sev-warning'];
+  if (/FLOOD/.test(event) && /WARNING/.test(event))
+    return BANNER_THEMES['sev-flood'];
+  if (/WATCH/.test(event))
+    return BANNER_THEMES['watch'];
+  return BANNER_THEMES['default'];
+}
+
 function updateNotifyBanner(relevant) {
   const banner = document.getElementById('notify-banner');
   const textEl = document.getElementById('notify-text');
@@ -2463,6 +2511,13 @@ function updateNotifyBanner(relevant) {
   textEl.textContent = count === 1
     ? `Active: ${mostSevereEvent} for your area.`
     : `Active: ${count} severe weather alerts for your area, including ${mostSevereEvent}.`;
+
+  // Apply the color theme matching the most severe active alert
+  const theme = notifyThemeForAlert(relevant[0]);
+  banner.style.setProperty('--nb-bg', theme.bg);
+  banner.style.setProperty('--nb-text', theme.text);
+  banner.style.setProperty('--nb-btn-bg', theme.btnBg);
+  banner.style.setProperty('--nb-btn-text', theme.btnText);
 
   banner.dataset.currentKey = alertKey;
   banner.classList.add('show');

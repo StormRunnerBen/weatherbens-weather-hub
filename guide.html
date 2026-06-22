@@ -76,16 +76,18 @@
   .brand-name .ben { color: var(--electric); }
 
   .back-btn {
+    font-family: var(--mono);
     font-size: 0.75rem;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: #111;
+    background: var(--electric);
     text-decoration: none;
-    border: 1px solid var(--border);
     border-radius: 5px;
-    padding: 0.3rem 0.65rem;
+    padding: 0.3rem 0.75rem;
     white-space: nowrap;
-    transition: color 0.15s, border-color 0.15s;
+    transition: opacity 0.15s;
   }
-  .back-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .back-btn:hover { opacity: 0.85; }
 
   /* ── Hero ── */
   .guide-hero {
@@ -231,14 +233,15 @@
     display: inline-block;
     font-family: var(--mono);
     font-size: 0.8rem;
-    color: var(--accent);
+    font-weight: 600;
+    color: #111;
+    background: var(--electric);
     text-decoration: none;
-    border: 1px solid var(--accent);
     border-radius: 6px;
     padding: 0.5rem 1.25rem;
-    transition: background 0.15s;
+    transition: opacity 0.15s;
   }
-  .guide-footer a:hover { background: rgba(77,184,255,0.1); }
+  .guide-footer a:hover { opacity: 0.85; }
 
   @media (max-width: 600px) {
     .guide-hero h1 { font-size: 1.3rem; }
