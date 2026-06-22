@@ -1175,6 +1175,32 @@
     text-decoration: none;
   }
   .day-detail-spc-link:hover { text-decoration: underline; }
+  .spc-hazards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.6rem;
+  }
+  .spc-hazard-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 32px;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.74rem;
+  }
+  .spc-hazard-label { color: var(--text-muted); }
+  .spc-hazard-bar-wrap {
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .spc-hazard-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .spc-hazard-pct { color: var(--text); font-weight: 600; text-align: right; }
   .day-detail-note {
     margin-top: 0.6rem;
     font-size: 0.72rem;
@@ -1507,37 +1533,76 @@ let currentLocation = null; // { name, admin1 (state), lat, lon, timezone }
 let spcOutlooks = null; // cached SPC categorical risk for days 1-3, keyed by day offset from today
 
 // ── SPC Convective Outlook fetch ──
-// Queries NOAA's MapServer for the SPC categorical outlook for Days 1, 2, and 3
-// using a point-in-polygon spatial query. Results are cached in spcOutlooks as an
-// object keyed by day offset (1, 2, 3) with { dn, label } values.
-// Layer IDs: 1 = Day 1 Categorical, 9 = Day 2 Categorical, 17 = Day 3 Categorical
-// dn values: 2=TSTM, 3=Marginal, 4=Slight, 5=Enhanced, 6=Moderate, 8=High
+// Queries NOAA's MapServer for the SPC categorical outlook for Days 1–3
+// AND the probabilistic tornado/hail/wind outlook for Days 1–2.
+// Results are cached in spcOutlooks keyed by day offset:
+//   { dn, label, tornado, hail, wind }
+// where tornado/hail/wind are probability % integers (5, 10, 15, 30, 45, 60)
+// or null if the point is outside any hazard polygon.
+// Day 3 has no individual hazard probabilities (only categorical + combined severe).
+//
+// Layer IDs (verified against live MapServer):
+//   Day 1: Categorical=1, Prob Tornado=3, Prob Hail=5, Prob Wind=7
+//   Day 2: Categorical=9, Prob Tornado=11, Prob Hail=13, Prob Wind=15
+//   Day 3: Categorical=17 (no individual hazard layers)
 const SPC_BASE = 'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/MapServer';
-const SPC_LAYER_IDS = { 1: 1, 2: 9, 3: 17 };
+
+const SPC_CAT_LAYERS  = { 1: 1,  2: 9,  3: 17 };
+const SPC_TOR_LAYERS  = { 1: 3,  2: 11 };
+const SPC_HAIL_LAYERS = { 1: 5,  2: 13 };
+const SPC_WIND_LAYERS = { 1: 7,  2: 15 };
+
+async function querySpcLayer(layerId, lat, lon) {
+  const url = `${SPC_BASE}/${layerId}/query?where=1%3D1` +
+    `&geometry=${lon}%2C${lat}&geometryType=esriGeometryPoint` +
+    `&inSR=4326&spatialRel=esriSpatialRelIntersects` +
+    `&outFields=dn&returnGeometry=false&f=geojson`;
+  const res = await fetch(url);
+  const d = await res.json();
+  const features = d.features || [];
+  return features.length > 0 ? features[0].properties.dn : null;
+}
 
 async function fetchSpcOutlooks(lat, lon) {
   const results = {};
-  await Promise.allSettled(
-    Object.entries(SPC_LAYER_IDS).map(async ([dayOffset, layerId]) => {
-      try {
-        const url = `${SPC_BASE}/${layerId}/query?where=1%3D1` +
-          `&geometry=${lon}%2C${lat}&geometryType=esriGeometryPoint` +
-          `&inSR=4326&spatialRel=esriSpatialRelIntersects` +
-          `&outFields=dn%2Clabel&returnGeometry=false&f=geojson`;
-        const res = await fetch(url);
-        const d = await res.json();
-        const features = d.features || [];
-        if (features.length > 0) {
-          const props = features[0].properties;
-          results[Number(dayOffset)] = { dn: props.dn, label: props.label };
-        } else {
-          results[Number(dayOffset)] = null; // point outside any outlook polygon = no severe risk
-        }
-      } catch (e) {
-        results[Number(dayOffset)] = undefined; // undefined = fetch failed, different from null (no risk)
-      }
-    })
-  );
+
+  // Run all queries in parallel — categorical for days 1-3,
+  // hazard probabilities for days 1-2
+  const tasks = [];
+
+  for (const [dayOffset, layerId] of Object.entries(SPC_CAT_LAYERS)) {
+    tasks.push(
+      querySpcLayer(layerId, lat, lon)
+        .then(dn => { results[Number(dayOffset)] = results[Number(dayOffset)] || {}; results[Number(dayOffset)].dn = dn; })
+        .catch(() => { results[Number(dayOffset)] = results[Number(dayOffset)] || {}; results[Number(dayOffset)].dn = undefined; })
+    );
+  }
+
+  for (const [dayOffset, layerId] of Object.entries(SPC_TOR_LAYERS)) {
+    tasks.push(
+      querySpcLayer(layerId, lat, lon)
+        .then(dn => { results[Number(dayOffset)] = results[Number(dayOffset)] || {}; results[Number(dayOffset)].tornado = dn; })
+        .catch(() => {})
+    );
+  }
+
+  for (const [dayOffset, layerId] of Object.entries(SPC_HAIL_LAYERS)) {
+    tasks.push(
+      querySpcLayer(layerId, lat, lon)
+        .then(dn => { results[Number(dayOffset)] = results[Number(dayOffset)] || {}; results[Number(dayOffset)].hail = dn; })
+        .catch(() => {})
+    );
+  }
+
+  for (const [dayOffset, layerId] of Object.entries(SPC_WIND_LAYERS)) {
+    tasks.push(
+      querySpcLayer(layerId, lat, lon)
+        .then(dn => { results[Number(dayOffset)] = results[Number(dayOffset)] || {}; results[Number(dayOffset)].wind = dn; })
+        .catch(() => {})
+    );
+  }
+
+  await Promise.allSettled(tasks);
   return results;
 }
 
@@ -1928,9 +1993,8 @@ function renderDaily(d) {
     // ── Summary label: add SPC risk for storm days on days 1-3 ──
     let displayDesc = desc;
     if (isStorm && spcInfo) {
-      displayDesc = `Thunderstorms · SPC: ${spcInfo.name}`;
-    } else if (isStorm && spc === null && dayOffset <= 3) {
-      // null = fetch succeeded but point outside any SPC polygon = no severe risk
+      displayDesc = `Thunderstorms · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
+    } else if (isStorm && spc && spc.dn === null && dayOffset <= 3) {
       displayDesc = 'Thunderstorms · No Severe Risk';
     }
 
@@ -1951,7 +2015,30 @@ function renderDaily(d) {
     // ── SPC expansion block ──
     let spcHtml = '';
     if (isStorm) {
+
+      // Build the hazard bar section if we have probabilistic data (Days 1-2 only).
+      // dn values from probabilistic layers are the probability % directly (2,5,10,15,30,45,60).
+      // Max bar width = 60% (the highest SPC probabilistic tier), so scale accordingly.
+      function hazardBarsHtml(tor, hail, wind) {
+        if (!tor && !hail && !wind) return '';
+        const bar = (pct, color) => {
+          if (!pct) return `<div class="spc-hazard-bar-wrap"><div class="spc-hazard-bar" style="width:0%;background:${color}"></div></div><span class="spc-hazard-pct">—</span>`;
+          const w = Math.min((pct / 60) * 100, 100).toFixed(0);
+          return `<div class="spc-hazard-bar-wrap"><div class="spc-hazard-bar" style="width:${w}%;background:${color}"></div></div><span class="spc-hazard-pct">${pct}%</span>`;
+        };
+        return `
+          <div class="spc-hazards">
+            <div class="spc-hazard-row"><span class="spc-hazard-label">Tornado</span>${bar(tor, '#c83232')}</div>
+            <div class="spc-hazard-row"><span class="spc-hazard-label">Hail</span>${bar(hail, '#c8a000')}</div>
+            <div class="spc-hazard-row"><span class="spc-hazard-label">Wind</span>${bar(wind, '#4db8ff')}</div>
+          </div>
+          <div class="day-detail-note" style="margin-top:0.4rem;">Probabilities represent the chance of that hazard within 25 miles of a point. Source: SPC.</div>`;
+      }
+
       if (spcInfo) {
+        const hazards = (dayOffset <= 2 && spc)
+          ? hazardBarsHtml(spc.tornado || null, spc.hail || null, spc.wind || null)
+          : '';
         spcHtml = `
           <div class="day-detail-spc" style="border-left: 3px solid ${spcInfo.color}">
             <div class="day-detail-spc-header">
@@ -1959,9 +2046,10 @@ function renderDaily(d) {
               <span class="day-detail-spc-title">SPC ${spcInfo.name}</span>
             </div>
             <div class="day-detail-spc-desc">${spcInfo.desc}</div>
-            <a class="day-detail-spc-link" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">View full SPC outlook ↗</a>
+            ${hazards}
+            <a class="day-detail-spc-link" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.5rem;">View full SPC outlook ↗</a>
           </div>`;
-      } else if (spc === null && dayOffset <= 3) {
+      } else if (spc && spc.dn === null && dayOffset <= 3) {
         spcHtml = `
           <div class="day-detail-spc" style="border-left: 3px solid #66a366">
             <div class="day-detail-spc-header">
@@ -1970,7 +2058,7 @@ function renderDaily(d) {
             <div class="day-detail-spc-desc">Your location is not in any SPC categorical severe weather area for this day. Thunderstorms are still possible but the organized severe weather risk is low.</div>
             <a class="day-detail-spc-link" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">View full SPC outlook ↗</a>
           </div>`;
-      } else if (spc === undefined && dayOffset <= 3) {
+      } else if (!spc && dayOffset <= 3) {
         spcHtml = `<div class="day-detail-note">SPC outlook data unavailable — <a href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">check SPC directly ↗</a></div>`;
       } else if (dayOffset > 3) {
         spcHtml = `<div class="day-detail-note">SPC categorical outlooks are only available for Days 1-3. For later days, monitor <a href="https://www.spc.noaa.gov/products/exper/day4-8/" target="_blank" rel="noopener">SPC Day 4-8 outlooks ↗</a></div>`;
@@ -2196,6 +2284,24 @@ function renderBriefing(daily, current) {
     <div class="briefing-row">
       <span class="briefing-row-text"><strong>Today:</strong> ${todayDesc.toLowerCase()}, high <span class="hl-temp">${todayHigh}°</span>, low ${todayLow}° · <span class="hl-rain">${todayRain}% chance of rain</span></span>
     </div>`);
+
+  // If today is a storm day and we have SPC hazard data, surface it in the briefing
+  const isTodayStorm = [95, 96, 99].includes(todayCode);
+  const todaySpc = spcOutlooks && spcOutlooks[1];
+  if (isTodayStorm && todaySpc) {
+    const todaySpcInfo = todaySpc.dn ? SPC_RISK_INFO[todaySpc.dn] : null;
+    const parts = [];
+    if (todaySpcInfo) parts.push(`SPC: ${todaySpcInfo.name}`);
+    if (todaySpc.tornado) parts.push(`Tornado ${todaySpc.tornado}%`);
+    if (todaySpc.hail)    parts.push(`Hail ${todaySpc.hail}%`);
+    if (todaySpc.wind)    parts.push(`Wind ${todaySpc.wind}%`);
+    if (parts.length > 0) {
+      rows.push(`
+        <div class="briefing-row">
+          <span class="briefing-row-text"><strong>Severe weather outlook:</strong> ${parts.join(' · ')} — tap the forecast card below for full detail.</span>
+        </div>`);
+    }
+  }
 
   rows.push(`
     <div class="briefing-row">
