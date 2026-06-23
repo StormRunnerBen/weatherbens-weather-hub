@@ -734,6 +734,145 @@
   }
   .alert-modal-footer a { color: var(--accent); }
 
+  /* ── What's New modal ── */
+  #whats-new-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5,10,20,0.8);
+    backdrop-filter: blur(3px);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #whats-new-overlay.show { display: flex; }
+  .wn-modal {
+    background: #0c1622;
+    border: 1px solid rgba(245,255,61,0.3);
+    border-radius: 12px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 0 40px rgba(245,255,61,0.08), 0 20px 60px rgba(0,0,0,0.6);
+    overflow: hidden;
+    animation: wn-in 0.25s ease-out;
+  }
+  @keyframes wn-in {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .wn-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.3rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(245,255,61,0.04);
+  }
+  .wn-header-left { display: flex; align-items: center; gap: 0.65rem; }
+  .wn-badge {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    background: var(--electric);
+    color: #111;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+  }
+  .wn-title {
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .wn-version {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+  .wn-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .wn-close:hover { color: var(--text); border-color: var(--text-muted); }
+  .wn-body {
+    padding: 1.1rem 1.3rem;
+    max-height: 65vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .wn-intro {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+  }
+  .wn-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.65rem 0.8rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 7px;
+    border-left: 2px solid var(--border);
+    transition: border-color 0.15s;
+  }
+  .wn-item:hover { border-left-color: var(--accent); }
+  .wn-item.wn-highlight { border-left-color: var(--electric); }
+  .wn-item-icon {
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+    line-height: 1;
+  }
+  .wn-item-text { font-size: 0.82rem; line-height: 1.5; }
+  .wn-item-title { font-weight: 600; color: var(--text); margin-bottom: 0.15rem; }
+  .wn-item-desc { color: var(--text-muted); }
+  .wn-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.3rem;
+    border-top: 1px solid var(--border);
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .wn-dont-show {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .wn-dont-show input { accent-color: var(--accent); cursor: pointer; }
+  .wn-got-it {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #111;
+    background: var(--electric);
+    border: none;
+    border-radius: 6px;
+    padding: 0.45rem 1.1rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .wn-got-it:hover { opacity: 0.85; }
+
   /* ── Section headings ── */
   .section-label {
     font-family: var(--mono);
@@ -1667,6 +1806,27 @@
       <div class="alert-modal-meta" id="alert-modal-meta"></div>
       <div id="alert-modal-sections"></div>
       <div class="alert-modal-footer" id="alert-modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- What's New modal -->
+  <div id="whats-new-overlay" role="dialog" aria-modal="true" aria-label="What's New">
+    <div class="wn-modal">
+      <div class="wn-header">
+        <div class="wn-header-left">
+          <span class="wn-badge">NEW</span>
+          <span class="wn-title">What's New</span>
+          <span class="wn-version" id="wn-version"></span>
+        </div>
+        <button class="wn-close" onclick="closeWhatsNew()" aria-label="Close">✕</button>
+      </div>
+      <div class="wn-body" id="wn-body"></div>
+      <div class="wn-footer">
+        <label class="wn-dont-show">
+          <input type="checkbox" id="wn-suppress"> Don't show this again until next update
+        </label>
+        <button class="wn-got-it" onclick="closeWhatsNew()">Got it</button>
+      </div>
     </div>
   </div>
 
@@ -3506,11 +3666,93 @@ if (lastLocation) {
   loadLocation(lastLocation);
 }
 
+// Show What's New after a short delay so the page settles first
+setTimeout(() => showWhatsNew(), 600);
+
 // Background intervals are safe to set now; they no-op until currentLocation is set.
 setInterval(() => { if (currentLocation) fetchWeather(); }, 5 * 60 * 1000); // refresh every 5 min
 setInterval(() => { if (currentLocation) fetchAlerts(); }, 60 * 1000); // refresh every 60 sec — severe weather alerts need to be near real-time
 
-// ── My Locations panel ──
+// ── What's New modal ──
+// Bump WHATS_NEW_VERSION whenever a meaningful update ships.
+// Users who have already seen this version won't see it again
+// unless they clear localStorage or the version string changes.
+const WHATS_NEW_VERSION = '2026.06';
+const WHATS_NEW_KEY = 'weatherbens_whats_new_seen';
+
+// Feature list for the current version.
+// Each entry: { icon, title, desc, highlight (bool) }
+// highlight = true gives the item the electric yellow left border treatment.
+const WHATS_NEW_ITEMS = [
+  {
+    icon: '📍',
+    title: 'My Locations',
+    desc: 'Save up to 3 locations and see their current conditions at a glance — temp, high/low, rain, wind, and any active alerts — without leaving the page.',
+    highlight: true
+  },
+  {
+    icon: '🕐',
+    title: 'Hourly Forecast Detail',
+    desc: 'Tap any hour in the 48-hour strip to expand it and see feels-like temperature, precipitation amount, and wind speed for that specific hour.',
+    highlight: false
+  },
+  {
+    icon: '⛈️',
+    title: 'SPC Hazard Probabilities',
+    desc: 'Storm days in the 7-day forecast now show SPC probabilistic tornado, hail, and wind percentages for Days 1–2, so you know not just the risk category but the specific hazard breakdown.',
+    highlight: true
+  },
+  {
+    icon: '📋',
+    title: 'Clickable Alert Reports',
+    desc: 'Tap any active weather alert to read the full NWS report text, including the affected area, effective/expiration times, and a direct link to weather.gov.',
+    highlight: false
+  },
+  {
+    icon: '🌅',
+    title: 'Morning Briefing',
+    desc: 'A collapsible daily summary at the top of the page covering today\'s forecast, tomorrow\'s outlook, active alert status, and a clothing suggestion based on conditions.',
+    highlight: false
+  },
+];
+
+function showWhatsNew(force = false) {
+  const seen = localStorage.getItem(WHATS_NEW_KEY);
+  if (!force && seen === WHATS_NEW_VERSION) return; // already seen this version
+
+  // Populate content
+  document.getElementById('wn-version').textContent = `v${WHATS_NEW_VERSION}`;
+  document.getElementById('wn-body').innerHTML = `
+    <p class="wn-intro">Here's what's been added to WeatherBen's Weather Hub. Thanks for testing — your feedback helps shape what comes next.</p>
+    ${WHATS_NEW_ITEMS.map(item => `
+      <div class="wn-item${item.highlight ? ' wn-highlight' : ''}">
+        <span class="wn-item-icon">${item.icon}</span>
+        <div class="wn-item-text">
+          <div class="wn-item-title">${item.title}</div>
+          <div class="wn-item-desc">${item.desc}</div>
+        </div>
+      </div>`).join('')}
+  `;
+
+  document.getElementById('whats-new-overlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWhatsNew() {
+  // If the suppress checkbox is checked, mark this version as seen
+  if (document.getElementById('wn-suppress').checked) {
+    try { localStorage.setItem(WHATS_NEW_KEY, WHATS_NEW_VERSION); } catch(e) {}
+  }
+  document.getElementById('whats-new-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// Close on overlay click (outside the modal card)
+document.getElementById('whats-new-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeWhatsNew();
+});
+
+// ── What's New init — defer slightly so the page loads first ──
 // Fetches current conditions + active alerts for each saved location
 // in parallel when the panel opens. Results are cached for 5 minutes.
 const MAX_FAVORITES = 3;
