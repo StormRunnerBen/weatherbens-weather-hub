@@ -1273,8 +1273,196 @@
   }
   .open-btn:hover { opacity: 0.85; box-shadow: 0 0 12px rgba(245,255,61,0.35); }
 
-  /* ── Footer ── */
-  footer {
+  /* ── My Locations panel ── */
+  #locations-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5,13,26,0.72);
+    z-index: 200;
+    backdrop-filter: blur(2px);
+  }
+  #locations-overlay.show { display: block; }
+
+  #locations-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(380px, 100vw);
+    background: #0c1e3a;
+    border-left: 1px solid var(--border);
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  #locations-panel.open { transform: translateX(0); }
+
+  .lp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .lp-title {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .lp-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+  .lp-close:hover { color: var(--text); }
+
+  .lp-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .lp-empty {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  .lp-empty strong { color: var(--text); display: block; margin-bottom: 0.4rem; }
+
+  .lp-limit-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 0.5rem 0 0.25rem;
+  }
+
+  /* ── Location dashboard card ── */
+  .loc-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .loc-card:hover { border-color: rgba(77,184,255,0.4); background: rgba(77,184,255,0.04); }
+  .loc-card.loc-active { border-color: var(--electric); }
+
+  .loc-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.55rem;
+  }
+  .loc-card-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .loc-card-name .loc-active-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--electric);
+    border-radius: 50%;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+    margin-bottom: 1px;
+  }
+  .loc-card-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.1rem 0.25rem;
+    border-radius: 3px;
+    opacity: 0.6;
+    transition: opacity 0.15s, color 0.15s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .loc-card-remove:hover { opacity: 1; color: var(--danger); }
+
+  .loc-card-main {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .loc-card-icon { font-size: 1.6rem; line-height: 1; flex-shrink: 0; }
+  .loc-card-temp {
+    font-family: var(--mono);
+    font-size: 1.9rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+  .loc-card-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  .loc-card-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.3rem 0.5rem;
+    font-size: 0.74rem;
+  }
+  .loc-meta-item { display: flex; flex-direction: column; gap: 0.05rem; }
+  .loc-meta-label { color: var(--text-muted); font-size: 0.66rem; }
+  .loc-meta-value { color: var(--text); font-weight: 500; }
+
+  .loc-alert-badge {
+    margin-top: 0.55rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: rgba(255,79,79,0.15);
+    border: 1px solid rgba(255,79,79,0.35);
+    color: #ff7070;
+  }
+  .loc-alert-badge.warn-tor { background: rgba(200,0,0,0.18); border-color: rgba(200,0,0,0.4); color: #ff6060; }
+  .loc-alert-badge.warn-svr { background: rgba(180,140,0,0.18); border-color: rgba(180,140,0,0.4); color: #ffd040; }
+  .loc-alert-badge.warn-fld { background: rgba(0,140,60,0.18); border-color: rgba(0,140,60,0.4); color: #50e090; }
+
+  .loc-card-loading {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .loc-add-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.55;
+    padding: 0.75rem;
+    background: rgba(77,184,255,0.04);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+  .loc-add-hint strong { color: var(--accent); }
     margin-top: 2.5rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border);
@@ -1319,7 +1507,8 @@
       <span class="brand-name"><span class="ben">WeatherBen's</span> Weather Hub</span>
       <span class="brand-sub" id="location-label">Search for a location</span>
     </div>
-    <div style="display:flex; align-items:center; gap:0.6rem;">
+    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+      <button onclick="openLocationsPanel()" id="locations-btn" style="font-size:0.75rem; font-weight:600; color:var(--text-muted); background:transparent; border:1.5px solid var(--border); border-radius:5px; padding:0.3rem 0.75rem; white-space:nowrap; cursor:pointer; transition:color 0.15s, border-color 0.15s; font-family:var(--mono);" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--text-muted)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='var(--border)'">My Locations</button>
       <a href="guide.html" style="font-size:0.75rem; font-weight:600; color:#111; background:var(--electric); text-decoration:none; border-radius:5px; padding:0.3rem 0.75rem; white-space:nowrap; transition:opacity 0.15s; font-family:var(--mono);" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">How to Use</a>
       <a href="feedback.html" style="font-size:0.75rem; font-weight:600; color:var(--electric); background:transparent; border:1.5px solid var(--electric); text-decoration:none; border-radius:5px; padding:0.3rem 0.75rem; white-space:nowrap; transition:opacity 0.15s; font-family:var(--mono);" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">Send Feedback</a>
       <div class="header-time">
@@ -1328,6 +1517,18 @@
       </div>
     </div>
   </header>
+
+  <!-- My Locations slide-in panel -->
+  <div id="locations-overlay" onclick="closeLocationsPanel()"></div>
+  <div id="locations-panel" role="dialog" aria-label="My Locations">
+    <div class="lp-header">
+      <span class="lp-title">My Locations</span>
+      <button class="lp-close" onclick="closeLocationsPanel()" aria-label="Close">✕</button>
+    </div>
+    <div class="lp-body" id="lp-body">
+      <div class="lp-empty"><strong>No saved locations yet.</strong>Search for a city and tap ☆ Save this location to add it here.</div>
+    </div>
+  </div>
 
   <!-- Location Search -->
   <div class="location-bar">
@@ -3021,6 +3222,14 @@ function toggleFavorite() {
   if (idx >= 0) {
     favs.splice(idx, 1); // already saved — remove it
   } else {
+    if (favs.length >= MAX_FAVORITES) {
+      // At limit — show a brief message rather than silently failing
+      const statusEl = document.getElementById('location-status');
+      const orig = statusEl.innerHTML;
+      statusEl.innerHTML = `<span style="color:var(--warning);">You already have ${MAX_FAVORITES} saved locations. Remove one from My Locations first.</span>`;
+      setTimeout(() => { statusEl.innerHTML = orig; }, 3000);
+      return;
+    }
     favs.push({
       name: currentLocation.name,
       admin1: currentLocation.admin1,
@@ -3033,6 +3242,7 @@ function toggleFavorite() {
   setFavorites(favs);
   updateLocationStatus();
   renderFavoritesRow();
+  updateLocationsBtnBadge();
 }
 
 function removeFavorite(key, event) {
@@ -3040,6 +3250,7 @@ function removeFavorite(key, event) {
   const favs = getFavorites().filter(f => favoriteKey(f) !== key);
   setFavorites(favs);
   renderFavoritesRow();
+  updateLocationsBtnBadge();
   if (currentLocation && favoriteKey(currentLocation) === key) {
     updateLocationStatus();
   }
@@ -3289,6 +3500,7 @@ function checkRadar() {
 // and show any saved favorite chips. If neither exists, the page starts
 // in the locked/search-first state as before.
 renderFavoritesRow();
+updateLocationsBtnBadge();
 const lastLocation = getLastLocation();
 if (lastLocation) {
   loadLocation(lastLocation);
@@ -3297,6 +3509,164 @@ if (lastLocation) {
 // Background intervals are safe to set now; they no-op until currentLocation is set.
 setInterval(() => { if (currentLocation) fetchWeather(); }, 5 * 60 * 1000); // refresh every 5 min
 setInterval(() => { if (currentLocation) fetchAlerts(); }, 60 * 1000); // refresh every 60 sec — severe weather alerts need to be near real-time
+
+// ── My Locations panel ──
+// Fetches current conditions + active alerts for each saved location
+// in parallel when the panel opens. Results are cached for 5 minutes.
+const MAX_FAVORITES = 3;
+let locationWeatherCache = {};
+const LOC_CACHE_TTL = 5 * 60 * 1000;
+
+function openLocationsPanel() {
+  document.getElementById('locations-overlay').classList.add('show');
+  document.getElementById('locations-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderLocationsPanel();
+}
+
+function closeLocationsPanel() {
+  document.getElementById('locations-overlay').classList.remove('show');
+  document.getElementById('locations-panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLocationsPanel();
+});
+
+function locAlertBadge(events) {
+  if (!events || events.length === 0) return '';
+  const sorted = [...events].sort((a, b) =>
+    alertSortPriority(a, null) - alertSortPriority(b, null));
+  const top = sorted[0].toUpperCase();
+  let cls = /TORNADO/.test(top) ? 'warn-tor' : /THUNDERSTORM/.test(top) ? 'warn-svr' : /FLOOD/.test(top) ? 'warn-fld' : '';
+  return `<div class="loc-alert-badge ${cls}">⚠ ${sorted[0]}</div>`;
+}
+
+async function fetchLocationWeather(loc) {
+  const key = favoriteKey(loc);
+  const cached = locationWeatherCache[key];
+  if (cached && (Date.now() - cached.fetchedAt) < LOC_CACHE_TTL) return cached.data;
+
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
+    + `&current=temperature_2m,weather_code,wind_speed_10m`
+    + `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max`
+    + `&temperature_unit=fahrenheit&wind_speed_unit=mph`
+    + `&timezone=${encodeURIComponent(loc.timezone)}&forecast_days=2&past_days=1`;
+
+  const alertsUrl = `https://api.weather.gov/alerts/active?point=${loc.lat},${loc.lon}&status=actual&message_type=alert,update`;
+
+  const [wRes, aRes] = await Promise.allSettled([
+    fetch(weatherUrl).then(r => r.json()),
+    fetch(alertsUrl).then(r => r.json())
+  ]);
+
+  const weather = wRes.status === 'fulfilled' ? wRes.value : null;
+  const alertEvents = aRes.status === 'fulfilled'
+    ? [...new Set((aRes.value.features || []).map(f => f.properties.event))]
+    : [];
+
+  const data = { weather, alertEvents };
+  locationWeatherCache[key] = { data, fetchedAt: Date.now() };
+  return data;
+}
+
+async function renderLocationsPanel() {
+  const body = document.getElementById('lp-body');
+  const favs = getFavorites();
+
+  if (favs.length === 0) {
+    body.innerHTML = `
+      <div class="lp-empty">
+        <strong>No saved locations yet.</strong>
+        Search for a city and tap ☆ Save this location to pin it here.
+      </div>`;
+    return;
+  }
+
+  // Render skeletons immediately
+  body.innerHTML = favs.map((f, idx) => {
+    const key = favoriteKey(f);
+    const isActive = currentLocation && favoriteKey(currentLocation) === key;
+    return `<div class="loc-card${isActive ? ' loc-active' : ''}" onclick="loadLocationFromPanel('${key}')" id="loc-card-${idx}">
+      <div class="loc-card-top">
+        <div class="loc-card-name">${f.displayName}${isActive ? '<span class="loc-active-dot"></span>' : ''}</div>
+        <button class="loc-card-remove" onclick="removeFromPanel('${key.replace(/'/g,"\\'")}', event)" aria-label="Remove">✕</button>
+      </div>
+      <div class="loc-card-loading">Loading…</div>
+    </div>`;
+  }).join('');
+
+  if (favs.length < MAX_FAVORITES) {
+    body.innerHTML += `<div class="loc-add-hint">Save up to <strong>${MAX_FAVORITES} locations</strong>. Search a city and tap ☆ Save this location.</div>`;
+  } else {
+    body.innerHTML += `<div class="lp-limit-note">3 / 3 locations saved — remove one to add another.</div>`;
+  }
+
+  // Fill cards with live data in parallel
+  await Promise.allSettled(favs.map(async (f, idx) => {
+    const card = document.getElementById(`loc-card-${idx}`);
+    if (!card) return;
+    try {
+      const { weather, alertEvents } = await fetchLocationWeather(f);
+      if (!weather || !weather.current) {
+        card.querySelector('.loc-card-loading').textContent = 'Unable to load weather.';
+        return;
+      }
+      const cur = weather.current;
+      const daily = weather.daily;
+      // past_days=1 means index 0 = yesterday, index 1 = today
+      const hiF  = daily ? Math.round(daily.temperature_2m_max[1]) : '—';
+      const loF  = daily ? Math.round(daily.temperature_2m_min[1]) : '—';
+      const rain = daily ? (daily.precipitation_probability_max[1] ?? 0) : '—';
+      const [desc, icon] = wmoInfo(cur.weather_code);
+
+      card.querySelector('.loc-card-loading').outerHTML = `
+        <div class="loc-card-main">
+          <span class="loc-card-icon">${icon}</span>
+          <div>
+            <div class="loc-card-temp">${Math.round(cur.temperature_2m)}°</div>
+            <div class="loc-card-desc">${desc}</div>
+          </div>
+        </div>
+        <div class="loc-card-meta">
+          <div class="loc-meta-item"><span class="loc-meta-label">High</span><span class="loc-meta-value">${hiF}°</span></div>
+          <div class="loc-meta-item"><span class="loc-meta-label">Low</span><span class="loc-meta-value">${loF}°</span></div>
+          <div class="loc-meta-item"><span class="loc-meta-label">Rain</span><span class="loc-meta-value">${rain}%</span></div>
+          <div class="loc-meta-item"><span class="loc-meta-label">Wind</span><span class="loc-meta-value">${Math.round(cur.wind_speed_10m)} mph</span></div>
+        </div>
+        ${locAlertBadge(alertEvents)}`;
+    } catch(e) {
+      const el = card.querySelector('.loc-card-loading');
+      if (el) el.textContent = 'Unable to load weather.';
+    }
+  }));
+}
+
+function loadLocationFromPanel(key) {
+  const loc = getFavorites().find(f => favoriteKey(f) === key);
+  if (!loc) return;
+  closeLocationsPanel();
+  loadLocation(loc);
+}
+
+function removeFromPanel(key, event) {
+  if (event) event.stopPropagation();
+  delete locationWeatherCache[key];
+  const favs = getFavorites().filter(f => favoriteKey(f) !== key);
+  setFavorites(favs);
+  renderFavoritesRow();
+  updateLocationsBtnBadge();
+  if (currentLocation && favoriteKey(currentLocation) === key) updateLocationStatus();
+  renderLocationsPanel();
+}
+
+function updateLocationsBtnBadge() {
+  const btn = document.getElementById('locations-btn');
+  if (!btn) return;
+  const count = getFavorites().length;
+  btn.textContent = count > 0 ? `My Locations (${count})` : 'My Locations';
+}
 </script>
 </body>
 </html>
