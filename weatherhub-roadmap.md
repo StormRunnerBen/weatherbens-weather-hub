@@ -278,16 +278,17 @@ PWA → Play Store TWA is a natural progression and relatively low-friction. App
 ## Summary: Recommended Order of Operations
 
 1. **Done:** Netlify Forms feedback form — live and collecting submissions
-2. **Next (any order, all no-backend):**
-   - Hourly forecast view — highest user value, easiest to build
-   - Feels-like prominence — half a day, immediate impact
-   - Saved locations / multi-location dashboard — lays push notification groundwork
+2. **Done:** Hourly forecast detail — tappable hour cards with feels-like, wind, and precipitation detail
+3. **Done:** Saved locations / My Locations panel — up to 3 locations with live conditions and alert badges
+4. **Done:** Precipitation timing — 7-day cards show when rain is expected, not just how likely; 24-hour rain chances chart in Your Backyard Forecast
+5. **Next (any order, all no-backend):**
+   - Feels-like and humidity prominence — half a day, immediate impact
    - Recent SPC storm reports — differentiating feature, verify CORS first
    - Winter weather precipitation breakdown — high seasonal value for Midwest users
-3. **Near term:** Build the PWA (manifest + service worker + icons) — one weekend
-4. **If growth warrants it:** Add Play Store distribution via TWA
-5. **If growth warrants it:** Build the push notification backend
-6. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
+6. **Near term:** Build the PWA (manifest + service worker + icons) — one weekend
+7. **If growth warrants it:** Add Play Store distribution via TWA
+8. **If growth warrants it:** Build the push notification backend
+9. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
 
 ---
 

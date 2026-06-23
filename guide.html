@@ -288,33 +288,54 @@
       </div>
     </div>
 
-    <!-- Morning Briefing -->
+    <!-- My Locations -->
     <div class="guide-section">
       <div class="section-header">
-        
         <div>
-          <div class="section-title">Morning Briefing</div>
-          <div class="section-subtitle">A quick daily summary at the top of the page</div>
+          <div class="section-title">My Locations</div>
+          <div class="section-subtitle">Save and monitor up to 3 locations at a glance</div>
         </div>
       </div>
       <div class="section-body">
-        <p>The collapsible Morning Briefing card gives you a fast rundown before you scroll: today's conditions and high/low, tomorrow's outlook, current alert status, and a plain-English clothing suggestion.</p>
-        <p>Tap anywhere on the card header to expand or collapse it. The briefing updates automatically whenever weather or alert data refreshes — every 5 minutes for weather, every 60 seconds for alerts.</p>
+        <p>Tap <span class="hl">My Locations</span> in the header to open a slide-in panel showing current conditions for each of your saved locations — temperature, condition, high/low, rain chance, wind, and any active alerts.</p>
+        <p>To save a location, search for it and tap <span class="hl">☆ Save this location</span> below the search bar. You can save up to 3 locations. Tap any card in the panel to load that location fully, or tap the ✕ to remove it.</p>
+        <div class="tip">
+          My Locations is a great way to keep an eye on family members or a commute destination during active weather — you can see at a glance whether they have any alerts active without switching locations.
+        </div>
       </div>
     </div>
 
-    <!-- Day at a Glance -->
+    <!-- Your Day at a Glance -->
     <div class="guide-section">
       <div class="section-header">
         
         <div>
           <div class="section-title">Your Day at a Glance</div>
-          <div class="section-subtitle">Current conditions snapshot</div>
+          <div class="section-subtitle">A quick daily summary at the top of the page</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>The collapsible Your Day at a Glance card gives you a fast rundown any time of day: today's forecast and high/low, tomorrow's outlook, next rain timing, current alert status, and a clothing suggestion.</p>
+        <p>Tap anywhere on the card header to expand or collapse it. The briefing updates automatically whenever weather or alert data refreshes — every 5 minutes for weather, every 60 seconds for alerts.</p>
+      </div>
+    </div>
+
+    <!-- Your Backyard Forecast -->
+    <div class="guide-section">
+      <div class="section-header">
+        
+        <div>
+          <div class="section-title">Your Backyard Forecast</div>
+          <div class="section-subtitle">Live current conditions and upcoming rain</div>
         </div>
       </div>
       <div class="section-body">
         <p>The hero card shows the current temperature, feels-like, and a short description of today's outlook. Below it, the conditions grid breaks down wind speed and direction, humidity, dew point, UV index, and visibility — all updated every 5 minutes from <span class="hl">Open-Meteo</span>.</p>
-        <p>The <span class="hl">Past 24 Hours</span> precipitation chart shows hourly rainfall totals from the last day so you can get a sense of what's already fallen.</p>
+        <p>The <span class="hl">Rain Chances · Next 24 Hours</span> chart shows hourly precipitation probability as a bar chart — yellow bars indicate rain likely (70%+), bright blue bars indicate rain expected (40–69%), and faint blue bars indicate rain possible (5–39%). A "next rain" summary above the chart tells you when to expect the first meaningful precipitation.</p>
+        <p>The <span class="hl">Past 24 Hours</span> precipitation chart shows hourly rainfall totals from the last day so you can see what's already fallen.</p>
+        <div class="tip">
+          Precipitation timing and probability are model estimates — actual conditions may vary. The chart refreshes every 5 minutes alongside all other weather data.
+        </div>
       </div>
     </div>
 
@@ -394,7 +415,8 @@
       </div>
       <div class="section-body">
         <p>Each day shows a high/low, precipitation probability, and a condition summary. <span class="hl-warn">Tap any day card</span> to expand it and see additional detail: feels-like range, total precipitation, rain and snow breakdown, max wind and gusts, UV index, and sunrise/sunset times.</p>
-        <p>On days forecast as thunderstorms, the expanded view shows the <span class="hl">SPC Convective Outlook</span> risk level for Days 1–3, pulled directly from the Storm Prediction Center. For Days 4–7, SPC categorical data isn't available, so only the model-derived condition is shown.</p>
+        <p>The expanded view also shows a <span class="hl">Precipitation Timing</span> estimate — e.g. "Rain expected · 10 AM – 2 PM" or "Rain on and off throughout the day, starting around 9 AM" — derived from hourly model data. This is subject to change and shown with a disclaimer.</p>
+        <p>On days forecast as thunderstorms, the expanded view shows the <span class="hl">SPC Convective Outlook</span> risk level for Days 1–3, plus probabilistic tornado, hail, and wind percentages for Days 1–2. For Days 4–7, SPC categorical data isn't available, so only the model-derived condition is shown.</p>
 
         <div class="guide-divider">SPC Risk Levels</div>
         <div class="risk-table">

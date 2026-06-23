@@ -340,7 +340,7 @@
   }
   .location-suggestion-item .sugg-sub { color: var(--text-muted); font-size: 0.74rem; margin-left: 6px; }
 
-  /* ── Morning Briefing (collapsible) ── */
+  /* ── Your Day at a Glance (collapsible) ── */
   .briefing-card {
     margin-top: 1rem;
     border: 1px solid rgba(245,255,61,0.25);
@@ -840,6 +840,55 @@
   .wn-item-text { font-size: 0.82rem; line-height: 1.5; }
   .wn-item-title { font-weight: 600; color: var(--text); margin-bottom: 0.15rem; }
   .wn-item-desc { color: var(--text-muted); }
+  .wn-version-section { display: flex; flex-direction: column; gap: 0.5rem; }
+  .wn-version-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.1rem 0;
+  }
+  .wn-version-badge {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: rgba(77,184,255,0.1);
+    border: 1px solid rgba(77,184,255,0.25);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .wn-version-badge.current {
+    color: #111;
+    background: var(--electric);
+    border-color: var(--electric);
+  }
+  .wn-version-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+  .wn-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.5rem 0 0.25rem;
+  }
+  .wn-section-divider::before,
+  .wn-section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .wn-section-divider-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
   .wn-footer {
     display: flex;
     align-items: center;
@@ -973,6 +1022,71 @@
     font-family: var(--mono);
     font-size: 5.5px;
     fill: var(--text-muted);
+  }
+
+  /* ── Precipitation probability chart ── */
+  .precip-prob-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem 0.7rem;
+    margin-top: 0.75rem;
+  }
+  .precip-prob-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .precip-prob-title {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+  .precip-prob-next {
+    font-size: 0.78rem;
+    color: var(--text);
+  }
+  .precip-prob-next .pnext-none { color: var(--text-muted); }
+  .precip-prob-next .pnext-possible { color: var(--accent); }
+  .precip-prob-next .pnext-expected { color: var(--accent); font-weight: 500; }
+  .precip-prob-next .pnext-likely   { color: var(--electric); font-weight: 600; }
+  .precip-prob-svg {
+    width: 100%;
+    display: block;
+    overflow: visible;
+  }
+  .pp-threshold {
+    stroke: var(--border);
+    stroke-width: 0.6;
+    stroke-dasharray: 2 2;
+  }
+  .pp-threshold-label {
+    font-family: var(--mono);
+    font-size: 5px;
+    fill: var(--text-muted);
+  }
+  .pp-hour-label {
+    font-family: var(--mono);
+    font-size: 5.5px;
+    fill: var(--text-muted);
+    text-anchor: middle;
+  }
+  .pp-now-line {
+    stroke: var(--electric);
+    stroke-width: 1;
+    stroke-opacity: 0.5;
+  }
+  .pp-now-label {
+    font-family: var(--mono);
+    font-size: 5px;
+    fill: var(--electric);
+    fill-opacity: 0.8;
+    text-anchor: middle;
   }
   .cond-label {
     font-size: 0.72rem;
@@ -1698,12 +1812,12 @@
   <!-- Everything below is hidden until a location is loaded -->
   <div id="app-content" class="app-content-hidden">
 
-  <!-- Morning Briefing (collapsible, condensed daily readout) -->
+  <!-- Your Day at a Glance (collapsible, condensed daily readout) -->
   <div class="briefing-card" id="briefing-card">
     <button type="button" class="briefing-toggle" id="briefing-toggle" aria-expanded="false">
       <span class="briefing-toggle-label">
-        Morning Briefing
-        <span class="briefing-toggle-sub" id="briefing-toggle-sub">Tap to see today's rundown</span>
+        Your Day at a Glance
+        <span class="briefing-toggle-sub" id="briefing-toggle-sub">Today's forecast summary</span>
       </span>
       <span class="briefing-chevron">▾</span>
     </button>
@@ -1712,10 +1826,10 @@
     </div>
   </div>
 
-  <!-- Section Divider: Your Day -->
+  <!-- Section Divider: Your Backyard Forecast -->
   <div class="section-divider">
     <div class="divider-line"></div>
-    <div class="divider-text">Your Day at a Glance</div>
+    <div class="divider-text">Your Backyard Forecast</div>
     <div class="divider-line"></div>
   </div>
   <p class="divider-sub" id="divider-sub-day">Current conditions, today's outlook, and recent rainfall for your area</p>
@@ -1743,6 +1857,15 @@
     <div class="cond-card"><div class="cond-label">Visibility</div><div class="cond-val"><span id="c-vis">—</span><span class="cond-unit">mi</span></div><div class="cond-desc">Clarity of the air</div></div>
     <div class="cond-card"><div class="cond-label">UV Index</div><div class="cond-val"><span id="c-uv-val">—</span></div><div class="cond-desc" id="c-uv-desc">—</div></div>
     <div class="cond-card"><div class="cond-label">Precip today</div><div class="cond-val"><span id="c-precip">—</span><span class="cond-unit">in</span></div><div class="cond-desc" id="c-precip-prob">Chance: —%</div></div>
+  </div>
+
+  <!-- Precipitation probability chart — next 24 hours -->
+  <div class="precip-prob-card" id="precip-prob-card">
+    <div class="precip-prob-header">
+      <span class="precip-prob-title">Rain Chances · Next 24 Hours</span>
+      <span class="precip-prob-next" id="precip-prob-next"></span>
+    </div>
+    <svg id="precip-prob-chart" class="precip-prob-svg" viewBox="0 0 480 56" preserveAspectRatio="none" role="img" aria-label="Hourly precipitation probability for the next 24 hours"></svg>
   </div>
 
   <!-- Hourly -->
@@ -2021,7 +2144,7 @@ async function fetchWeather() {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${currentLocation.lat}&longitude=${currentLocation.lon}`
     + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,uv_index,visibility,dew_point_2m`
     + `&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m`
-    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max,sunrise,sunset`
+    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max,sunrise,sunset`
     + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
     + `&timezone=${encodeURIComponent(currentLocation.timezone)}&forecast_days=7&past_days=1`;
 
@@ -2031,10 +2154,12 @@ async function fetchWeather() {
     renderCurrent(d.current);
     renderHourly(d.hourly);
     renderTempTrend(d.hourly);
-    renderDaily(d.daily);
+    renderPrecipProbChart(d.hourly);
+    renderDaily(d.daily, d.hourly);
     renderPrecipHistory(d.hourly);
     renderDaySummary(d.daily, d.current);
-    latestDaily = d.daily; // cached so the Morning Briefing can re-render once alerts arrive
+    latestDaily = d.daily;
+    latestHourly = d.hourly;
     latestCurrent = d.current;
     renderBriefing(latestDaily, latestCurrent);
     document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('en-US', { timeZone: currentLocation.timezone, hour:'numeric', minute:'2-digit' });
@@ -2253,6 +2378,91 @@ function renderTempTrend(h) {
   `;
 }
 
+function renderPrecipProbChart(h) {
+  const svg = document.getElementById('precip-prob-chart');
+  const nextEl = document.getElementById('precip-prob-next');
+  const now = new Date();
+
+  let startIdx = 0;
+  for (let i = 0; i < h.time.length; i++) {
+    if (new Date(h.time[i]) >= now) { startIdx = i; break; }
+  }
+
+  const endIdx = Math.min(startIdx + 24, h.time.length);
+  const probs  = h.precipitation_probability.slice(startIdx, endIdx);
+  const times  = h.time.slice(startIdx, endIdx).map(t => new Date(t));
+
+  if (probs.length < 2) { svg.innerHTML = ''; return; }
+
+  const W = 480, H = 56;
+  const barAreaTop = 4, barAreaBottom = 14;
+  const barAreaH = H - barAreaTop - barAreaBottom;
+  const barW = W / probs.length;
+  const barGap = 1;
+
+  const barColor = pct => pct >= 70 ? '#f5ff3d' : '#4db8ff';
+  const barOpacity = pct => {
+    if (pct >= 70) return '0.9';
+    if (pct >= 40) return '0.7';
+    if (pct >= 5)  return '0.35';
+    return '0';
+  };
+
+  let bars = '';
+  probs.forEach((pct, i) => {
+    if (pct < 5) return;
+    const x = i * barW + barGap / 2;
+    const bw = barW - barGap;
+    const bh = (pct / 100) * barAreaH;
+    const y = barAreaTop + barAreaH - bh;
+    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${barColor(pct)}" fill-opacity="${barOpacity(pct)}" rx="1"/>`;
+  });
+
+  const yAt = pct => (barAreaTop + barAreaH - (pct / 100) * barAreaH).toFixed(1);
+  const thresholds = `
+    <line class="pp-threshold" x1="0" y1="${yAt(70)}" x2="${W}" y2="${yAt(70)}"/>
+    <text class="pp-threshold-label" x="2" y="${(parseFloat(yAt(70)) - 1).toFixed(1)}">70%</text>
+    <line class="pp-threshold" x1="0" y1="${yAt(40)}" x2="${W}" y2="${yAt(40)}"/>
+    <text class="pp-threshold-label" x="2" y="${(parseFloat(yAt(40)) - 1).toFixed(1)}">40%</text>`;
+
+  let labels = '';
+  times.forEach((t, i) => {
+    if (i % 3 !== 0) return;
+    const x = (i + 0.5) * barW;
+    const label = t.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: currentLocation.timezone });
+    labels += `<text class="pp-hour-label" x="${x.toFixed(1)}" y="${H - 2}">${label}</text>`;
+  });
+
+  const nowX = barW * 0.5;
+  const nowLine = `
+    <line class="pp-now-line" x1="${nowX.toFixed(1)}" y1="${barAreaTop}" x2="${nowX.toFixed(1)}" y2="${barAreaTop + barAreaH}"/>
+    <text class="pp-now-label" x="${nowX.toFixed(1)}" y="${(barAreaTop - 1).toFixed(1)}">NOW</text>`;
+
+  svg.innerHTML = thresholds + bars + nowLine + labels;
+
+  const POSSIBLE = 5, EXPECTED = 40, LIKELY = 70;
+  let nextIdx = -1, nextTier = '';
+  for (let i = 0; i < probs.length; i++) {
+    if (probs[i] >= POSSIBLE) {
+      nextIdx = i;
+      nextTier = probs[i] >= LIKELY ? 'likely' : probs[i] >= EXPECTED ? 'expected' : 'possible';
+      break;
+    }
+  }
+
+  if (nextIdx === -1) {
+    nextEl.innerHTML = '<span class="pnext-none">No rain in the next 24 hours</span>';
+  } else if (nextIdx === 0) {
+    const label = nextTier === 'likely' ? 'Rain likely now' : nextTier === 'expected' ? 'Rain expected now' : 'Rain possible now';
+    nextEl.innerHTML = `<span class="pnext-${nextTier}">${label}</span>`;
+  } else {
+    const startTime = times[nextIdx].toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: currentLocation.timezone });
+    const label = nextTier === 'likely' ? 'Rain likely' : nextTier === 'expected' ? 'Rain expected' : 'Rain possible';
+    nextEl.innerHTML = `<span class="pnext-${nextTier}">${label} starting around ${startTime}</span>`;
+  }
+}
+
+
 function renderPrecipHistory(h) {
   const now = new Date();
   // Find index of current hour in the combined past+future hourly array
@@ -2310,6 +2520,77 @@ function renderPrecipHistory(h) {
 }
 
 // SPC categorical risk descriptions — used in the day expansion panel.
+// ── Precipitation timing from hourly data ──
+// Given a day's hourly probability slice, returns a human-readable string
+// describing when precipitation is expected using three tiers:
+//   5–39%  → "possible"
+//   40–69% → "expected"
+//   70%+   → "likely"
+// Contiguous hours above threshold are grouped into windows. If the total
+// span exceeds 8 hours, it collapses to "on and off throughout the day"
+// with the first start time. Below 5% all day → "No precipitation expected".
+function precipTimingLabel(hourlyProbs, hourlyTimes, timezone) {
+  const POSSIBLE  = 5;
+  const EXPECTED  = 40;
+  const LIKELY    = 70;
+
+  // Determine the highest tier that appears in this day's hours
+  const maxProb = Math.max(...hourlyProbs);
+  if (maxProb < POSSIBLE) return { label: 'No precipitation expected', tier: 'none' };
+
+  const tier = maxProb >= LIKELY ? 'likely' : maxProb >= EXPECTED ? 'expected' : 'possible';
+  const tierLabel = maxProb >= LIKELY ? 'Rain likely' : maxProb >= EXPECTED ? 'Rain expected' : 'Rain possible';
+  const threshold = maxProb >= LIKELY ? LIKELY : maxProb >= EXPECTED ? EXPECTED : POSSIBLE;
+
+  // Find contiguous windows above the threshold
+  const windows = [];
+  let winStart = null;
+  for (let i = 0; i < hourlyProbs.length; i++) {
+    if (hourlyProbs[i] >= threshold) {
+      if (winStart === null) winStart = i;
+    } else {
+      if (winStart !== null) {
+        windows.push({ start: winStart, end: i - 1 });
+        winStart = null;
+      }
+    }
+  }
+  if (winStart !== null) windows.push({ start: winStart, end: hourlyProbs.length - 1 });
+
+  if (windows.length === 0) return { label: 'No precipitation expected', tier: 'none' };
+
+  const fmtHour = idx => new Date(hourlyTimes[idx]).toLocaleTimeString('en-US', {
+    hour: 'numeric', hour12: true, timeZone: timezone
+  });
+
+  // Count total rainy hours across all windows (not the span including dry gaps)
+  const totalRainyHours = windows.reduce((sum, w) => sum + (w.end - w.start + 1), 0);
+
+  if (totalRainyHours > 8) {
+    // Spread across too much of the day to give a useful window
+    return {
+      label: `${tierLabel} · on and off throughout the day, starting around ${fmtHour(windows[0].start)}`,
+      tier
+    };
+  }
+
+  if (windows.length === 1) {
+    const w = windows[0];
+    if (w.start === w.end) {
+      return { label: `${tierLabel} · around ${fmtHour(w.start)}`, tier };
+    }
+    return { label: `${tierLabel} · ${fmtHour(w.start)} – ${fmtHour(w.end + 1)}`, tier };
+  }
+
+  // Multiple distinct windows — show up to 2
+  const parts = windows.slice(0, 2).map(w =>
+    w.start === w.end
+      ? `around ${fmtHour(w.start)}`
+      : `${fmtHour(w.start)} – ${fmtHour(w.end + 1)}`
+  );
+  return { label: `${tierLabel} · ${parts.join(', then ')}`, tier };
+}
+
 const SPC_RISK_INFO = {
   2: { name: 'General Thunder', short: 'TSTM', color: '#c1e9c1',
        desc: 'Thunderstorms are possible but the organized severe weather risk is low. Garden-variety storms with lightning and heavy rain are the main concerns.' },
@@ -2325,7 +2606,7 @@ const SPC_RISK_INFO = {
        desc: 'A particularly dangerous situation is expected. Violent tornadoes, catastrophic hail, and extreme winds are likely over a large area. This is the highest SPC outlook level — treat this with the utmost seriousness.' },
 };
 
-function renderDaily(d) {
+function renderDaily(d, h) {
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const container = document.getElementById('daily-list');
   container.innerHTML = '';
@@ -2365,13 +2646,26 @@ function renderDaily(d) {
     const precipIn = d.precipitation_sum ? d.precipitation_sum[i] : null;
     const rainIn   = d.rain_sum        ? d.rain_sum[i]         : null;
     const snowIn   = d.snowfall_sum    ? d.snowfall_sum[i]     : null;
-    const precipHr = d.precipitation_hours ? d.precipitation_hours[i] : null;
     const windMph  = d.wind_speed_10m_max   ? Math.round(d.wind_speed_10m_max[i])  : null;
     const gustMph  = d.wind_gusts_10m_max   ? Math.round(d.wind_gusts_10m_max[i])  : null;
     const uvMax    = d.uv_index_max         ? d.uv_index_max[i].toFixed(1)         : null;
     const sunrise  = d.sunrise ? d.sunrise[i] : null;
     const sunset   = d.sunset  ? d.sunset[i]  : null;
     const fmtTime  = iso => iso ? new Date(iso).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }) : '—';
+
+    // ── Precipitation timing from hourly data ──
+    // Daily index i maps to hourly slice [i*24 .. (i+1)*24-1].
+    // past_days=1 prepends one day to both arrays, so the indices align directly.
+    let precipTiming = null;
+    if (h && h.precipitation_probability && h.time) {
+      const sliceStart = i * 24;
+      const sliceEnd   = Math.min(sliceStart + 24, h.precipitation_probability.length);
+      const dayProbs   = h.precipitation_probability.slice(sliceStart, sliceEnd);
+      const dayTimes   = h.time.slice(sliceStart, sliceEnd);
+      if (dayProbs.length > 0) {
+        precipTiming = precipTimingLabel(dayProbs, dayTimes, currentLocation.timezone);
+      }
+    }
 
     // ── SPC expansion block ──
     let spcHtml = '';
@@ -2446,7 +2740,6 @@ function renderDaily(d) {
     const detailItems = [
       feelsHi !== null ? `<div class="day-detail-item"><span class="day-detail-label">Feels like</span><span class="day-detail-value">${feelsHi}° / ${feelsLo}°</span></div>` : '',
       precipIn !== null ? `<div class="day-detail-item"><span class="day-detail-label">Precip total</span><span class="day-detail-value">${precipIn.toFixed(2)}"</span></div>` : '',
-      precipHr !== null ? `<div class="day-detail-item"><span class="day-detail-label">Precip hours</span><span class="day-detail-value">${precipHr} hr</span></div>` : '',
       rainIn !== null && rainIn > 0 ? `<div class="day-detail-item"><span class="day-detail-label">Rain total</span><span class="day-detail-value">${rainIn.toFixed(2)}"</span></div>` : '',
       snowIn !== null && snowIn > 0 ? `<div class="day-detail-item"><span class="day-detail-label">Snow total</span><span class="day-detail-value">${snowIn.toFixed(1)}"</span></div>` : '',
       windMph !== null ? `<div class="day-detail-item"><span class="day-detail-label">Max wind</span><span class="day-detail-value">${windMph} mph</span></div>` : '',
@@ -2455,6 +2748,15 @@ function renderDaily(d) {
       sunrise ? `<div class="day-detail-item"><span class="day-detail-label">Sunrise</span><span class="day-detail-value">${fmtTime(sunrise)}</span></div>` : '',
       sunset  ? `<div class="day-detail-item"><span class="day-detail-label">Sunset</span><span class="day-detail-value">${fmtTime(sunset)}</span></div>` : '',
     ].filter(Boolean).join('');
+
+    // Precipitation timing row — shown as a full-width block below the grid
+    // so the time range isn't cramped into a tiny cell.
+    const timingHtml = precipTiming ? `
+      <div style="margin-top:0.6rem; padding:0.5rem 0.7rem; background:rgba(77,184,255,0.05); border-radius:6px; border-left:2px solid var(--accent); font-size:0.8rem;">
+        <span style="color:var(--text-muted); font-size:0.68rem; display:block; margin-bottom:0.15rem; text-transform:uppercase; letter-spacing:0.08em; font-family:var(--mono);">Precipitation Timing</span>
+        <span style="color:var(--text);">${precipTiming.label}</span>
+        <span style="display:block; font-size:0.68rem; color:var(--text-muted); margin-top:0.2rem;">Based on model data · subject to change</span>
+      </div>` : '';
 
     const card = document.createElement('div');
     card.className = 'day-card';
@@ -2470,6 +2772,7 @@ function renderDaily(d) {
       </div>
       <div class="day-detail">
         <div class="day-detail-grid">${detailItems}</div>
+        ${timingHtml}
         ${spcHtml}
         <div class="day-detail-note">Forecast data from Open-Meteo. Conditions are model estimates — actual amounts may vary. Monitor NWS for severe weather watches and warnings.</div>
       </div>
@@ -2570,7 +2873,7 @@ function renderDaySummary(daily, current) {
     `Currently ${Math.round(current.temperature_2m)}°F · Today's range ${lowF}°–${highF}° · ${currentLocation.displayName}`;
 }
 
-// ── Morning Briefing: condensed today + tomorrow + alerts + what-to-wear ──
+// ── Your Day at a Glance: condensed today + tomorrow + alerts + what-to-wear ──
 // Reuses the same daily/current payload already fetched for the rest of
 // the page (no extra network call) and the alerts cached by fetchAlerts().
 function clothingSuggestion(highF, lowF, code, rainProb, windMph) {
@@ -2672,6 +2975,29 @@ function renderBriefing(daily, current) {
     <div class="briefing-row">
       <span class="briefing-row-text"><strong>Tomorrow:</strong> ${tmrwDesc.toLowerCase()}, high <span class="hl-temp">${tmrwHigh}°</span>, low ${tmrwLow}° · <span class="hl-rain">${tmrwRain}% chance of rain</span></span>
     </div>`);
+
+  // Next rain timing — derived from the cached hourly data so no extra fetch needed.
+  // Only show if there's meaningful rain probability in the next 24 hours.
+  if (latestHourly && latestHourly.precipitation_probability && latestHourly.time) {
+    const now = new Date();
+    let startIdx = 0;
+    for (let i = 0; i < latestHourly.time.length; i++) {
+      if (new Date(latestHourly.time[i]) >= now) { startIdx = i; break; }
+    }
+    const endIdx = Math.min(startIdx + 24, latestHourly.precipitation_probability.length);
+    const probs = latestHourly.precipitation_probability.slice(startIdx, endIdx);
+    const htimes = latestHourly.time.slice(startIdx, endIdx);
+
+    if (probs.length > 0) {
+      const { label, tier } = precipTimingLabel(probs, htimes, currentLocation.timezone);
+      if (tier !== 'none') {
+        rows.push(`
+          <div class="briefing-row">
+            <span class="briefing-row-text"><strong>Next rain:</strong> ${label}</span>
+          </div>`);
+      }
+    }
+  }
 
   // Alerts: use the cached fetch from fetchAlerts() rather than hitting the
   // NWS API again. null means we haven't successfully fetched yet (or the
@@ -3048,7 +3374,7 @@ async function fetchAlerts() {
     const relevant = deduped.filter(f =>
       alertPassesPolygonFilter(f, currentLocation.lat, currentLocation.lon)
     );
-    latestAlerts = relevant; // cache for the Morning Briefing, which avoids a duplicate fetch
+    latestAlerts = relevant; // cache for the Your Day at a Glance section, which avoids a duplicate fetch
     if (relevant.length > 0) {
       bar.classList.add('show');
       // Sort by severity before rendering so the most critical alert always
@@ -3080,8 +3406,9 @@ async function fetchAlerts() {
 // (no browser storage used, per artifact constraints) so it won't keep
 // re-popping if the user already closed it for the same set of alerts.
 let dismissedAlertKey = null;
-let latestAlerts = null; // cache of the most recent NWS alerts fetch, shared with the Morning Briefing
-let latestDaily = null; // cache of the most recent daily forecast, also shared with the Morning Briefing
+let latestAlerts = null; // cache of the most recent NWS alerts fetch, shared with Your Day at a Glance
+let latestDaily = null; // cache of the most recent daily forecast, also shared with Your Day at a Glance
+let latestHourly = null; // cache of the most recent hourly forecast, used for precip timing in daily cards
 let latestCurrent = null;
 // Banner color themes keyed by alert tier.
 // Each theme: bg (banner background), text (banner text), btnBg, btnText.
@@ -3242,6 +3569,7 @@ async function loadLocation(loc) {
   dismissedAlertKey = null; // fresh location, don't carry over a prior dismissal
   latestAlerts = null;
   latestDaily = null;
+  latestHourly = null;
   latestCurrent = null;
   currentAlertFeatures = [];
   spcOutlooks = null;
@@ -3277,7 +3605,7 @@ async function loadLocation(loc) {
   // SPC risk label shows up without blocking the initial render.
   fetchSpcOutlooks(currentLocation.lat, currentLocation.lon).then(outlooks => {
     spcOutlooks = outlooks;
-    if (latestDaily) renderDaily(latestDaily); // re-render with SPC data now available
+    if (latestDaily) renderDaily(latestDaily, latestHourly); // re-render with SPC data now available
   });
 
   // Resolve NWS office for radar/forecast links (best-effort, US NWS coverage only)
@@ -3677,61 +4005,106 @@ setInterval(() => { if (currentLocation) fetchAlerts(); }, 60 * 1000); // refres
 // Bump WHATS_NEW_VERSION whenever a meaningful update ships.
 // Users who have already seen this version won't see it again
 // unless they clear localStorage or the version string changes.
-const WHATS_NEW_VERSION = '2026.06';
+const WHATS_NEW_VERSION = '2026.07';
 const WHATS_NEW_KEY = 'weatherbens_whats_new_seen';
 
-// Feature list for the current version.
-// Each entry: { icon, title, desc, highlight (bool) }
-// highlight = true gives the item the electric yellow left border treatment.
-const WHATS_NEW_ITEMS = [
+// Versioned changelog — newest version first, immediately preceding version second.
+// When bumping to a new version: add a new entry at the top, keep the previous
+// version's entry as the second, and remove anything older.
+// Each version has a label (displayed next to the version badge) and an items array.
+// Items: { icon, title, desc, highlight (bool — yellow left border for key additions) }
+const WHATS_NEW_CHANGELOG = [
   {
-    icon: '📍',
-    title: 'My Locations',
-    desc: 'Save up to 3 locations and see their current conditions at a glance — temp, high/low, rain, wind, and any active alerts — without leaving the page.',
-    highlight: true
+    version: '2026.07',
+    label: 'Current version',
+    items: [
+      {
+        icon: '🌧',
+        title: 'Precipitation Timing',
+        desc: 'The 7-day forecast cards now show when rain is expected, not just how likely — e.g. "Rain expected · 10 AM – 2 PM" or "Rain on and off throughout the day, starting around 9 AM." Based on model data and subject to change.',
+        highlight: true
+      },
+      {
+        icon: '📊',
+        title: 'Rain Chances Chart',
+        desc: 'A new 24-hour precipitation probability bar chart in Your Backyard Forecast shows at a glance when rain is coming, with a "next rain" summary at the top.',
+        highlight: true
+      },
+      {
+        icon: '🏡',
+        title: 'Renamed Sections',
+        desc: '"Morning Briefing" is now Your Day at a Glance — relevant any time of day, not just mornings. The section below it is now called Your Backyard Forecast to better reflect its live, local focus.',
+        highlight: false
+      },
+    ]
   },
   {
-    icon: '🕐',
-    title: 'Hourly Forecast Detail',
-    desc: 'Tap any hour in the 48-hour strip to expand it and see feels-like temperature, precipitation amount, and wind speed for that specific hour.',
-    highlight: false
-  },
-  {
-    icon: '⛈️',
-    title: 'SPC Hazard Probabilities',
-    desc: 'Storm days in the 7-day forecast now show SPC probabilistic tornado, hail, and wind percentages for Days 1–2, so you know not just the risk category but the specific hazard breakdown.',
-    highlight: true
-  },
-  {
-    icon: '📋',
-    title: 'Clickable Alert Reports',
-    desc: 'Tap any active weather alert to read the full NWS report text, including the affected area, effective/expiration times, and a direct link to weather.gov.',
-    highlight: false
-  },
-  {
-    icon: '🌅',
-    title: 'Morning Briefing',
-    desc: 'A collapsible daily summary at the top of the page covering today\'s forecast, tomorrow\'s outlook, active alert status, and a clothing suggestion based on conditions.',
-    highlight: false
+    version: '2026.06',
+    label: 'Previous version',
+    items: [
+      {
+        icon: '📍',
+        title: 'My Locations',
+        desc: 'Save up to 3 locations and see their current conditions at a glance — temp, high/low, rain, wind, and any active alerts — without leaving the page.',
+        highlight: false
+      },
+      {
+        icon: '🕐',
+        title: 'Hourly Forecast Detail',
+        desc: 'Tap any hour in the 48-hour strip to expand it and see feels-like temperature, precipitation amount, and wind speed for that specific hour.',
+        highlight: false
+      },
+      {
+        icon: '⛈️',
+        title: 'SPC Hazard Probabilities',
+        desc: 'Storm days in the 7-day forecast now show SPC probabilistic tornado, hail, and wind percentages for Days 1–2, so you know not just the risk category but the specific hazard breakdown.',
+        highlight: false
+      },
+      {
+        icon: '📋',
+        title: 'Clickable Alert Reports',
+        desc: 'Tap any active weather alert to read the full NWS report text, including the affected area, effective/expiration times, and a direct link to weather.gov.',
+        highlight: false
+      },
+    ]
   },
 ];
 
 function showWhatsNew(force = false) {
   const seen = localStorage.getItem(WHATS_NEW_KEY);
-  if (!force && seen === WHATS_NEW_VERSION) return; // already seen this version
+  if (!force && seen === WHATS_NEW_VERSION) return;
 
-  // Populate content
   document.getElementById('wn-version').textContent = `v${WHATS_NEW_VERSION}`;
-  document.getElementById('wn-body').innerHTML = `
-    <p class="wn-intro">Here's what's been added to WeatherBen's Weather Hub. Thanks for testing — your feedback helps shape what comes next.</p>
-    ${WHATS_NEW_ITEMS.map(item => `
+
+  const sectionsHtml = WHATS_NEW_CHANGELOG.map((section, sIdx) => {
+    const isCurrent = sIdx === 0;
+    const itemsHtml = section.items.map(item => `
       <div class="wn-item${item.highlight ? ' wn-highlight' : ''}">
         <span class="wn-item-icon">${item.icon}</span>
         <div class="wn-item-text">
           <div class="wn-item-title">${item.title}</div>
           <div class="wn-item-desc">${item.desc}</div>
         </div>
-      </div>`).join('')}
+      </div>`).join('');
+
+    const divider = sIdx > 0 ? `
+      <div class="wn-section-divider">
+        <span class="wn-section-divider-label">EARLIER THIS YEAR</span>
+      </div>` : '';
+
+    return `${divider}
+      <div class="wn-version-section">
+        <div class="wn-version-header">
+          <span class="wn-version-badge${isCurrent ? ' current' : ''}">v${section.version}</span>
+          <span class="wn-version-label">${section.label}</span>
+        </div>
+        ${itemsHtml}
+      </div>`;
+  }).join('');
+
+  document.getElementById('wn-body').innerHTML = `
+    <p class="wn-intro">Here's what's been added to WeatherBen's Weather Hub. Thanks for testing — your feedback helps shape what comes next.</p>
+    ${sectionsHtml}
   `;
 
   document.getElementById('whats-new-overlay').classList.add('show');

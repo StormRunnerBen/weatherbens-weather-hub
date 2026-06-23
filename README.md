@@ -17,7 +17,8 @@ A real-time severe weather tool built for people who take storm awareness seriou
 - **7-day forecast** — expandable daily cards with feels-like range, precipitation totals, wind, UV, sunrise/sunset, and SPC hazard breakdown on storm days
 - **48-hour hourly strip** — scrollable, tappable hour cards with wind, feels-like, and precipitation detail
 - **Live NEXRAD radar** — embedded from NWS, matched to your location's forecast office
-- **Morning Briefing** — collapsible daily summary with today/tomorrow forecast, active alert status, and a clothing suggestion
+- **Your Day at a Glance** — collapsible daily summary with today/tomorrow forecast, rain timing, active alert status, and a clothing suggestion — relevant any time of day
+- **Your Backyard Forecast** — current conditions snapshot (temperature, feels-like, wind, humidity, dew point, UV, visibility) plus a 24-hour precipitation probability chart with next-rain timing
 - **User feedback** — Netlify Forms integration for bug reports and feature requests
 
 ---
