@@ -840,6 +840,30 @@
   .wn-item-text { font-size: 0.82rem; line-height: 1.5; }
   .wn-item-title { font-weight: 600; color: var(--text); margin-bottom: 0.15rem; }
   .wn-item-desc { color: var(--text-muted); }
+  .wn-fixes-header {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--success);
+    margin-top: 0.4rem;
+    margin-bottom: 0.25rem;
+    padding-left: 0.1rem;
+  }
+  .wn-fix {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    padding: 0.5rem 0.7rem;
+    background: rgba(62,207,142,0.05);
+    border-radius: 6px;
+    border-left: 2px solid rgba(62,207,142,0.35);
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+  .wn-fix-icon { font-size: 0.85rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .wn-fix-text { color: var(--text-muted); }
+  .wn-fix-text strong { color: var(--text); font-weight: 600; }
   .wn-version-section { display: flex; flex-direction: column; gap: 0.5rem; }
   .wn-version-header {
     display: flex;
@@ -986,8 +1010,52 @@
   .cond-card-temp {
     grid-column: span 2;
   }
+  /* Temp + feels-like side by side in the temperature card */
+  .temp-feels-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .temp-actual {
+    font-family: var(--mono);
+    font-size: 2.6rem;
+    font-weight: 500;
+    color: var(--electric);
+    line-height: 1;
+  }
+  .temp-actual .cond-unit { font-size: 1.2rem; }
+  .temp-divider {
+    color: var(--border);
+    font-size: 1.4rem;
+    font-weight: 300;
+    align-self: center;
+  }
+  .temp-feels {
+    display: flex;
+    flex-direction: column;
+  }
+  .temp-feels-label {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--mono);
+    line-height: 1;
+    margin-bottom: 0.15rem;
+  }
+  .temp-feels-val {
+    font-family: var(--mono);
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1;
+  }
+  .temp-feels-val .cond-unit { font-size: 0.9rem; }
   @media (max-width: 600px) {
     .cond-card-temp { grid-column: span 2; }
+    .temp-actual { font-size: 2.2rem; }
+    .temp-feels-val { font-size: 1.5rem; }
   }
   .temp-trend-wrap {
     margin-top: 0.6rem;
@@ -1526,6 +1594,73 @@
   }
   .open-btn:hover { opacity: 0.85; box-shadow: 0 0 12px rgba(245,255,61,0.35); }
 
+  /* ── Recent Storm Reports ── */
+  .storm-reports-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .storm-report-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.4rem 0.85rem;
+    align-items: start;
+  }
+  .storm-report-card.rpt-tornado { border-left: 3px solid #ff3232; }
+  .storm-report-card.rpt-hail    { border-left: 3px solid var(--electric); }
+  .storm-report-card.rpt-wind    { border-left: 3px solid var(--accent); }
+  .storm-report-card.rpt-flood   { border-left: 3px solid var(--success); }
+  .storm-report-card.rpt-other   { border-left: 3px solid var(--border); }
+  .storm-report-icon { font-size: 1.2rem; grid-row: span 2; align-self: center; }
+  .storm-report-type {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .storm-report-loc {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+  .storm-report-mag {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--electric);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .storm-report-time {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .storm-report-remarks {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    grid-column: 2 / -1;
+    margin-top: 0.1rem;
+  }
+  .storm-reports-note {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 0.5rem 0;
+    line-height: 1.5;
+  }
+  @media (max-width: 600px) {
+    .storm-report-card { grid-template-columns: auto 1fr; }
+    .storm-report-mag  { grid-column: 2; text-align: left; }
+    .storm-report-time { display: none; }
+  }
+
   /* ── My Locations panel ── */
   #locations-overlay {
     display: none;
@@ -1846,14 +1981,24 @@
   <!-- Current Conditions -->
   <p class="section-label">Current Conditions</p>
   <div class="conditions-grid" id="current-grid">
-    <div class="cond-card cond-card-temp"><div class="cond-label">Temperature</div><div class="cond-val"><span id="c-temp">—</span><span class="cond-unit">°F</span></div><div class="cond-desc" id="c-feels">Feels like —°F</div>
+    <div class="cond-card cond-card-temp">
+      <div class="cond-label">Temperature</div>
+      <div class="temp-feels-row">
+        <div class="temp-actual"><span id="c-temp">—</span><span class="cond-unit">°F</span></div>
+        <div class="temp-divider">/</div>
+        <div class="temp-feels">
+          <span class="temp-feels-label">Feels like</span>
+          <span class="temp-feels-val"><span id="c-feels-val">—</span><span class="cond-unit">°F</span></span>
+        </div>
+      </div>
+    </div>
       <div class="temp-trend-wrap">
         <svg id="temp-trend-chart" class="temp-trend-svg" viewBox="0 0 240 44" preserveAspectRatio="none" role="img" aria-label="Feels-like temperature trend for the next 48 hours"></svg>
       </div>
     </div>
     <div class="cond-card"><div class="cond-label">Sky</div><div class="cond-val" style="font-size:1.1rem;padding-top:0.25rem" id="c-sky">—</div><div class="cond-desc" id="c-sky-sub"></div></div>
     <div class="cond-card"><div class="cond-label">Wind</div><div class="cond-val"><span id="c-wind">—</span><span class="cond-unit">mph</span></div><div class="cond-desc" id="c-winddir">—</div></div>
-    <div class="cond-card"><div class="cond-label">Humidity</div><div class="cond-val"><span id="c-hum">—</span><span class="cond-unit">%</span></div><div class="cond-desc" id="c-dew">Dew point —°F</div></div>
+    <div class="cond-card"><div class="cond-label">Humidity</div><div class="cond-val"><span id="c-hum">—</span><span class="cond-unit">%</span></div><div class="cond-desc">Dew point <span id="c-dew">—</span>°F</div></div>
     <div class="cond-card"><div class="cond-label">Visibility</div><div class="cond-val"><span id="c-vis">—</span><span class="cond-unit">mi</span></div><div class="cond-desc">Clarity of the air</div></div>
     <div class="cond-card"><div class="cond-label">UV Index</div><div class="cond-val"><span id="c-uv-val">—</span></div><div class="cond-desc" id="c-uv-desc">—</div></div>
     <div class="cond-card"><div class="cond-label">Precip today</div><div class="cond-val"><span id="c-precip">—</span><span class="cond-unit">in</span></div><div class="cond-desc" id="c-precip-prob">Chance: —%</div></div>
@@ -1887,6 +2032,17 @@
       <div class="precip-labels" id="precip-labels"></div>
     </div>
     <div class="precip-total" id="precip-total">Total: — in</div>
+  </div>
+
+  <!-- Recent Storm Reports -->
+  <div id="storm-reports-section" style="display:none;">
+    <div class="section-divider">
+      <div class="divider-line"></div>
+      <div class="divider-text">Recent Storm Reports</div>
+      <div class="divider-line"></div>
+    </div>
+    <p class="divider-sub">Confirmed severe weather reports near your location from NWS Local Storm Reports (last 24 hours)</p>
+    <div id="storm-reports-list"></div>
   </div>
 
   <!-- Section Divider: The Week Ahead -->
@@ -2188,12 +2344,12 @@ function uvRiskClass(uv) {
 function renderCurrent(c) {
   const [desc, icon] = wmoInfo(c.weather_code);
   document.getElementById('c-temp').textContent = Math.round(c.temperature_2m);
-  document.getElementById('c-feels').textContent = `Feels like ${Math.round(c.apparent_temperature)}°F`;
+  document.getElementById('c-feels-val').textContent = Math.round(c.apparent_temperature);
   document.getElementById('c-sky').textContent = icon + ' ' + desc;
   document.getElementById('c-wind').textContent = Math.round(c.wind_speed_10m);
   document.getElementById('c-winddir').textContent = windDir(c.wind_direction_10m) + ' · gusts vary';
   document.getElementById('c-hum').textContent = c.relative_humidity_2m;
-  document.getElementById('c-dew').textContent = `Dew point ${Math.round(c.dew_point_2m)}°F`;
+  document.getElementById('c-dew').textContent = Math.round(c.dew_point_2m);
   const visMi = (c.visibility / 1609.34).toFixed(1);
   document.getElementById('c-vis').textContent = visMi;
   const uv = Math.round(c.uv_index);
@@ -2869,8 +3025,11 @@ function renderDaySummary(daily, current) {
 
   document.getElementById('summary-icon').textContent = icon;
   document.getElementById('summary-headline').innerHTML = line;
+  const feelsLike = Math.round(current.apparent_temperature);
+  const actualTemp = Math.round(current.temperature_2m);
+  const feelsStr = feelsLike !== actualTemp ? ` · Feels like ${feelsLike}°F` : '';
   document.getElementById('summary-sub').textContent =
-    `Currently ${Math.round(current.temperature_2m)}°F · Today's range ${lowF}°–${highF}° · ${currentLocation.displayName}`;
+    `Currently ${actualTemp}°F${feelsStr} · Today's range ${lowF}°–${highF}° · ${currentLocation.displayName}`;
 }
 
 // ── Your Day at a Glance: condensed today + tomorrow + alerts + what-to-wear ──
@@ -3575,6 +3734,7 @@ async function loadLocation(loc) {
   spcOutlooks = null;
   activeHourIndex = null;
   document.getElementById('hour-detail-panel').classList.remove('show');
+  document.getElementById('storm-reports-section').style.display = 'none';
 
   // Reveal app content, hide the locked state
   document.getElementById('locked-state').style.display = 'none';
@@ -3599,6 +3759,7 @@ async function loadLocation(loc) {
   fetchWeather();
   fetchAlerts();
   checkRadar();
+  loadStormReports();
 
   // SPC outlook fetch is best-effort — kick off in parallel, cache results,
   // then re-render the daily forecast cards once the data arrives so the
@@ -3899,6 +4060,9 @@ async function handleUseMyLocation() {
   status.textContent = 'Requesting your location — check for a browser permission prompt.';
   suggestions.innerHTML = '';
 
+  // Detect Safari — it has known geolocation quirks that need specific guidance
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
   navigator.geolocation.getCurrentPosition(
     async (position) => {
       const { latitude, longitude } = position.coords;
@@ -3923,14 +4087,26 @@ async function handleUseMyLocation() {
     (err) => {
       status.classList.add('error');
       if (err.code === err.PERMISSION_DENIED) {
-        status.textContent = 'Location permission denied. No problem — search by city and state above instead.';
+        if (isSafari) {
+          // Safari caches permission denials — re-enabling in Settings requires a page reload.
+          // Provide specific guidance rather than a generic message.
+          status.innerHTML = 'Location permission denied. In Safari, go to <strong>Settings → Privacy & Security → Location Services → Safari</strong> and set it to "While Using". Then <strong>reload this page</strong> and try again. Or search by city and state above.';
+        } else {
+          status.textContent = 'Location permission denied. Check your browser settings, or search by city and state above instead.';
+        }
+      } else if (err.code === err.TIMEOUT) {
+        status.textContent = 'Location request timed out — your device took too long to get a GPS fix. Try again or search by city and state instead.';
       } else {
         status.textContent = 'Could not determine your location. Try searching by city and state instead.';
       }
       btn.disabled = false;
       btn.innerHTML = 'Use My Location';
     },
-    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    {
+      enableHighAccuracy: false,
+      timeout: 20000,    // increased from 10s → 20s; Safari on iOS can be slow indoors
+      maximumAge: 60000  // reduced from 5min → 1min; avoids stale cached positions on Safari
+    }
   );
 }
 
@@ -3998,8 +4174,124 @@ if (lastLocation) {
 setTimeout(() => showWhatsNew(), 600);
 
 // Background intervals are safe to set now; they no-op until currentLocation is set.
-setInterval(() => { if (currentLocation) fetchWeather(); }, 5 * 60 * 1000); // refresh every 5 min
-setInterval(() => { if (currentLocation) fetchAlerts(); }, 60 * 1000); // refresh every 60 sec — severe weather alerts need to be near real-time
+setInterval(() => { if (currentLocation) fetchWeather(); }, 5 * 60 * 1000);
+setInterval(() => { if (currentLocation) fetchAlerts(); }, 60 * 1000);
+setInterval(() => { if (currentLocation) loadStormReports(); }, 30 * 60 * 1000); // LSR updates every 30 min
+
+// ── Recent Storm Reports ──
+// Fetches NWS Local Storm Reports (LSRs) from the NOAA MapServer —
+// same CORS-enabled domain as the SPC outlook layers already in use.
+// Layer 0 = last 24 hours, queried with a 75-mile radius around the user.
+// Only shows report types relevant to public safety (tornado, hail,
+// damaging wind, flash flood) — filters out routine observations.
+const LSR_BASE = 'https://mapservices.weather.noaa.gov/vector/rest/services/obs/nws_local_storm_reports/MapServer/0';
+const LSR_RADIUS_MILES = 75;
+
+// Report types to show and their display config
+const LSR_TYPES = {
+  'TORNADO':        { label: 'Tornado',           icon: '🌪️', cls: 'rpt-tornado' },
+  'FUNNEL CLOUD':   { label: 'Funnel Cloud',       icon: '🌪️', cls: 'rpt-tornado' },
+  'WALL CLOUD':     { label: 'Wall Cloud',          icon: '🌪️', cls: 'rpt-tornado' },
+  'HAIL':           { label: 'Hail',                icon: '🧊', cls: 'rpt-hail'    },
+  'TSTM WND DMG':   { label: 'Storm Wind Damage',  icon: '💨', cls: 'rpt-wind'    },
+  'TSTM WND GST':   { label: 'Storm Wind Gust',    icon: '💨', cls: 'rpt-wind'    },
+  'NON-TSTM WND DMG': { label: 'Wind Damage',      icon: '💨', cls: 'rpt-wind'    },
+  'NON-TSTM WND GST': { label: 'Wind Gust',        icon: '💨', cls: 'rpt-wind'    },
+  'FLASH FLOOD':    { label: 'Flash Flood',         icon: '🌊', cls: 'rpt-flood'   },
+  'FLOOD':          { label: 'Flood',               icon: '🌊', cls: 'rpt-flood'   },
+};
+
+async function fetchStormReports(lat, lon) {
+  const url = `${LSR_BASE}/query?where=1%3D1`
+    + `&geometry=${lon}%2C${lat}&geometryType=esriGeometryPoint`
+    + `&inSR=4326&spatialRel=esriSpatialRelIntersects`
+    + `&distance=${LSR_RADIUS_MILES}&units=esriSRUnit_StatuteMile`
+    + `&outFields=Description%2CLocation%2CState%2CEventMagnitude%2CMagnitudeUnits%2CRemarks%2CTimeOfReport`
+    + `&returnGeometry=false&f=geojson`;
+  const res = await fetch(url);
+  const d = await res.json();
+  return d.features || [];
+}
+
+function renderStormReports(features) {
+  const section = document.getElementById('storm-reports-section');
+  const list = document.getElementById('storm-reports-list');
+
+  // Filter to only relevant report types
+  const relevant = features.filter(f => {
+    const desc = (f.properties.Description || '').toUpperCase().trim();
+    return Object.keys(LSR_TYPES).some(t => desc.includes(t));
+  });
+
+  if (relevant.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  // Sort most recent first
+  relevant.sort((a, b) => {
+    const ta = new Date(a.properties.TimeOfReport || 0).getTime();
+    const tb = new Date(b.properties.TimeOfReport || 0).getTime();
+    return tb - ta;
+  });
+
+  section.style.display = '';
+
+  const cards = relevant.map(f => {
+    const p = f.properties;
+    const desc = (p.Description || '').toUpperCase().trim();
+    const typeKey = Object.keys(LSR_TYPES).find(t => desc.includes(t)) || '';
+    const typeInfo = LSR_TYPES[typeKey] || { label: p.Description, icon: '⚠️', cls: 'rpt-other' };
+
+    // Format magnitude
+    let magStr = '';
+    if (p.EventMagnitude && p.EventMagnitude !== 'UNK' && p.EventMagnitude !== '0') {
+      const units = (p.MagnitudeUnits || '').replace('MPH', 'mph').replace('INCH', '"').replace('INCHES', '"');
+      magStr = `${p.EventMagnitude}${units ? ' ' + units : ''}`;
+    }
+
+    // Format time — LSR time is in UTC
+    const timeStr = p.TimeOfReport
+      ? new Date(p.TimeOfReport).toLocaleTimeString('en-US', {
+          hour: 'numeric', minute: '2-digit',
+          timeZone: currentLocation.timezone
+        })
+      : '';
+
+    // Location
+    const locStr = [p.Location, p.State].filter(Boolean).join(', ');
+
+    // Remarks — truncate to keep cards compact
+    const remarks = p.Remarks ? p.Remarks.slice(0, 180) + (p.Remarks.length > 180 ? '…' : '') : '';
+
+    return `
+      <div class="storm-report-card ${typeInfo.cls}">
+        <span class="storm-report-icon">${typeInfo.icon}</span>
+        <span class="storm-report-type">${typeInfo.label}</span>
+        <span class="storm-report-mag">${magStr}</span>
+        <span class="storm-report-loc">${locStr}</span>
+        <span class="storm-report-time">${timeStr}</span>
+        ${remarks ? `<span class="storm-report-remarks">${remarks}</span>` : ''}
+      </div>`;
+  }).join('');
+
+  list.innerHTML = `
+    <div class="storm-reports-grid">${cards}</div>
+    <div class="storm-reports-note">
+      Reports within ${LSR_RADIUS_MILES} miles · Source: NWS Local Storm Reports · Updated every 30 min
+    </div>`;
+}
+
+async function loadStormReports() {
+  if (!currentLocation) return;
+  try {
+    const features = await fetchStormReports(currentLocation.lat, currentLocation.lon);
+    renderStormReports(features);
+  } catch (e) {
+    // Fail silently — storm reports are supplementary, not critical
+    document.getElementById('storm-reports-section').style.display = 'none';
+  }
+}
 
 // ── What's New modal ──
 // Bump WHATS_NEW_VERSION whenever a meaningful update ships.
@@ -4036,6 +4328,28 @@ const WHATS_NEW_CHANGELOG = [
         desc: '"Morning Briefing" is now Your Day at a Glance — relevant any time of day, not just mornings. The section below it is now called Your Backyard Forecast to better reflect its live, local focus.',
         highlight: false
       },
+      {
+        icon: '🌡️',
+        title: 'Feels-Like Prominence',
+        desc: 'Feels-like temperature now sits alongside the actual temperature as a co-equal primary reading in Your Backyard Forecast, rather than being buried in the conditions grid.',
+        highlight: false
+      },
+      {
+        icon: '⚡',
+        title: 'Recent Storm Reports',
+        desc: 'Confirmed tornado, hail, and damaging wind reports from NWS Local Storm Reports now appear automatically when there are events within 75 miles of your location in the last 24 hours.',
+        highlight: true
+      },
+    ],
+    fixes: [
+      {
+        title: 'Safari — Use My Location not working',
+        desc: 'Safari caches permission denials and requires a page reload after re-enabling location access. The app now detects this and shows specific instructions for Safari users rather than a generic error message. Timeout also increased to 20 seconds to account for slower GPS acquisition on iOS.'
+      },
+      {
+        title: 'Clothing suggestion always showing "Comfortable layers"',
+        desc: 'Rain gear suggestions were not appearing on thunderstorm days because the storm check was short-circuiting before the rain probability was evaluated. Fixed — storm days with high rain probability now correctly suggest a rain jacket or umbrella.'
+      },
     ]
   },
   {
@@ -4067,6 +4381,7 @@ const WHATS_NEW_CHANGELOG = [
         highlight: false
       },
     ]
+    // No fixes in this version entry — omit the fixes key entirely when there's nothing to list
   },
 ];
 
@@ -4078,6 +4393,7 @@ function showWhatsNew(force = false) {
 
   const sectionsHtml = WHATS_NEW_CHANGELOG.map((section, sIdx) => {
     const isCurrent = sIdx === 0;
+
     const itemsHtml = section.items.map(item => `
       <div class="wn-item${item.highlight ? ' wn-highlight' : ''}">
         <span class="wn-item-icon">${item.icon}</span>
@@ -4086,6 +4402,15 @@ function showWhatsNew(force = false) {
           <div class="wn-item-desc">${item.desc}</div>
         </div>
       </div>`).join('');
+
+    // Bug fixes subsection — only rendered when the version has a fixes array
+    const fixesHtml = (section.fixes && section.fixes.length > 0) ? `
+      <div class="wn-fixes-header">BUG FIXES</div>
+      ${section.fixes.map(fix => `
+        <div class="wn-fix">
+          <span class="wn-fix-icon">✓</span>
+          <span class="wn-fix-text"><strong>${fix.title}</strong> — ${fix.desc}</span>
+        </div>`).join('')}` : '';
 
     const divider = sIdx > 0 ? `
       <div class="wn-section-divider">
@@ -4099,11 +4424,12 @@ function showWhatsNew(force = false) {
           <span class="wn-version-label">${section.label}</span>
         </div>
         ${itemsHtml}
+        ${fixesHtml}
       </div>`;
   }).join('');
 
   document.getElementById('wn-body').innerHTML = `
-    <p class="wn-intro">Here's what's been added to WeatherBen's Weather Hub. Thanks for testing — your feedback helps shape what comes next.</p>
+    <p class="wn-intro">Here's what's been added and fixed in WeatherBen's Weather Hub. Thanks for testing — your feedback helps shape what comes next.</p>
     ${sectionsHtml}
   `;
 
