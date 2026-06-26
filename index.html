@@ -2795,9 +2795,15 @@ function renderDaily(d, h) {
     const spc = (spcOutlooks && dayOffset <= 3) ? spcOutlooks[dayOffset] : undefined;
     const spcInfo = spc && spc.dn ? SPC_RISK_INFO[spc.dn] : null;
 
-    // ── Summary label: add SPC risk for storm days on days 1-3 ──
+    // ── Summary label: add SPC risk for storm days or any day with SPC data ──
     let displayDesc = desc;
-    if (isStorm && spcInfo) {
+    if (spcInfo && spcInfo.dn >= 3) {
+      // Show SPC risk in the label whenever SPC has Marginal or higher —
+      // regardless of what the weather model says. The SPC outlook is
+      // independent of Open-Meteo's WMO code; a "partly cloudy" model day
+      // can still have a Slight or Enhanced SPC risk.
+      displayDesc = `${desc} · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
+    } else if (isStorm && spcInfo) {
       displayDesc = `Thunderstorms · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
     } else if (isStorm && spc && spc.dn === null && dayOffset <= 3) {
       displayDesc = 'Thunderstorms · No Severe Risk';
@@ -2831,12 +2837,14 @@ function renderDaily(d, h) {
     }
 
     // ── SPC expansion block ──
+    // Show whenever we have SPC data for this day (Days 1-3), regardless of
+    // what the weather model's WMO code says. A "partly cloudy" model day can
+    // still have a Marginal or Slight SPC risk — gating on isStorm was hiding
+    // real SPC outlooks when the model and SPC disagreed.
     let spcHtml = '';
-    if (isStorm) {
+    if (dayOffset <= 3) {
 
       // Build the hazard bar section if we have probabilistic data (Days 1-2 only).
-      // dn values from probabilistic layers are the probability % directly (2,5,10,15,30,45,60).
-      // Max bar width = 60% (the highest SPC probabilistic tier), so scale accordingly.
       function hazardBarsHtml(tor, hail, wind) {
         if (!tor && !hail && !wind) return '';
         const bar = (pct, color) => {
@@ -2878,16 +2886,16 @@ function renderDaily(d, h) {
           </div>`;
       } else if (!spc && dayOffset <= 3) {
         spcHtml = `<div class="day-detail-note">SPC outlook data unavailable — <a href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">check SPC directly ↗</a></div>`;
-      } else if (dayOffset > 3) {
-        spcHtml = `<div class="day-detail-note">SPC categorical outlooks are only available for Days 1-3. For later days, monitor <a href="https://www.spc.noaa.gov/products/exper/day4-8/" target="_blank" rel="noopener">SPC Day 4-8 outlooks ↗</a></div>`;
       }
 
-      // Hail context (keep for codes 96/99 in the SPC block context)
+      // Hail context from model codes — still relevant even when SPC data is shown
       if (code === 96) {
         spcHtml += `<div class="day-detail-hail">Model indicates slight hail possible (typically under ¾"). Actual hail risk depends on storm development — monitor NWS alerts.</div>`;
       } else if (code === 99) {
         spcHtml += `<div class="day-detail-hail">Model indicates significant hail possible (¾" or larger). Consider protecting vehicles and monitoring NWS alerts as the day approaches.</div>`;
       }
+    } else {
+      spcHtml = `<div class="day-detail-note">SPC categorical outlooks are only available for Days 1-3. For later days, monitor <a href="https://www.spc.noaa.gov/products/exper/day4-8/" target="_blank" rel="noopener">SPC Day 4-8 outlooks ↗</a></div>`;
     }
 
     // ── UV description ──
@@ -3120,9 +3128,10 @@ function renderBriefing(daily, current) {
     </div>`);
 
   // If today is a storm day and we have SPC hazard data, surface it in the briefing
-  const isTodayStorm = [95, 96, 99].includes(todayCode);
   const todaySpc = spcOutlooks && spcOutlooks[1];
-  if (isTodayStorm && todaySpc) {
+  if (todaySpc && todaySpc.dn >= 3) {
+    // Show SPC row whenever Marginal or higher — regardless of what the
+    // weather model says. Don't gate on isTodayStorm.
     const todaySpcInfo = todaySpc.dn ? SPC_RISK_INFO[todaySpc.dn] : null;
     const parts = [];
     if (todaySpcInfo) parts.push(`SPC: ${todaySpcInfo.name}`);
