@@ -2367,7 +2367,9 @@ function renderCurrent(c) {
   uvValEl.className = uvCls;
   uvDescEl.innerHTML = `<span class="uv-dot ${uvCls}"></span>${uvRiskLabel(uv)}`;
   uvDescEl.className = `cond-desc ${uvCls}`;
-  document.getElementById('c-precip').textContent = c.precipitation.toFixed(2);
+  // c-precip and c-precip-prob are populated by renderDaySummary using daily
+  // precipitation_sum and precipitation_probability_max — not from the current
+  // object which only has the current hour's reading, not today's running total.
 }
 
 // Tracks which hour card is currently expanded so we can toggle it off.
@@ -3043,6 +3045,17 @@ function renderDaySummary(daily, current) {
   const feelsStr = feelsLike !== actualTemp ? ` · Feels like ${feelsLike}°F` : '';
   document.getElementById('summary-sub').textContent =
     `Currently ${actualTemp}°F${feelsStr} · Today's range ${lowF}°–${highF}° · ${currentLocation.displayName}`;
+
+  // Precip total — use daily.precipitation_sum[1] (today's running total)
+  // rather than current.precipitation which is only the current hour's reading.
+  if (daily.precipitation_sum) {
+    const totalIn = daily.precipitation_sum[1];
+    document.getElementById('c-precip').textContent = totalIn !== null ? totalIn.toFixed(2) : '0.00';
+  }
+
+  // Rain chance — daily max precipitation probability for today,
+  // which was never being populated (left at the default "—%").
+  document.getElementById('c-precip-prob').textContent = `Chance: ${rainProb ?? '—'}%`;
 }
 
 // ── Your Day at a Glance: condensed today + tomorrow + alerts + what-to-wear ──
@@ -4363,6 +4376,18 @@ const WHATS_NEW_CHANGELOG = [
       {
         title: 'Clothing suggestion always showing "Comfortable layers"',
         desc: 'Rain gear suggestions were not appearing on thunderstorm days because the storm check was short-circuiting before the rain probability was evaluated. Fixed — storm days with high rain probability now correctly suggest a rain jacket or umbrella.'
+      },
+      {
+        title: 'SPC outlook not showing for non-thunderstorm model days',
+        desc: 'The SPC block in the 7-day cards and Your Day at a Glance was gated on the weather model showing a thunderstorm code. Since SPC outlooks are independent of model conditions, a Slight Risk day the model showed as "Partly Cloudy" would silently show no SPC data. Fixed — SPC now shows for any day with Marginal risk or above regardless of the model code.'
+      },
+      {
+        title: 'SPC showing lower tier when multiple outlook polygons overlap',
+        desc: 'The SPC query could return multiple overlapping polygons (e.g. both a General Thunderstorm and a Slight Risk polygon) and was taking the first result rather than the highest tier. Fixed — the app now correctly takes the maximum risk level across all returned polygons.'
+      },
+      {
+        title: 'Precip today showing 0.00" and rain chance showing —%',
+        desc: 'Precip total was using the current hour\'s reading instead of today\'s running total. Rain chance was never being populated at all — it showed the default placeholder value permanently. Both now correctly use today\'s daily totals from the forecast data.'
       },
     ]
   },
