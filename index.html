@@ -2200,7 +2200,14 @@ async function querySpcLayer(layerId, lat, lon) {
   const res = await fetch(url);
   const d = await res.json();
   const features = d.features || [];
-  return features.length > 0 ? features[0].properties.dn : null;
+  if (features.length === 0) return null;
+  // Multiple overlapping polygons can be returned (e.g. a TSTM polygon AND a
+  // SLGT polygon both covering the same point). Take the highest dn value —
+  // the SPC renders these as nested polygons and the highest tier wins.
+  return features.reduce((max, f) => {
+    const dn = f.properties.dn;
+    return (dn !== null && dn !== undefined && dn > max) ? dn : max;
+  }, 0) || null;
 }
 
 async function fetchSpcOutlooks(lat, lon) {
