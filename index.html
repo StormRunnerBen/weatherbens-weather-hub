@@ -2795,16 +2795,14 @@ function renderDaily(d, h) {
     const spc = (spcOutlooks && dayOffset <= 3) ? spcOutlooks[dayOffset] : undefined;
     const spcInfo = spc && spc.dn ? SPC_RISK_INFO[spc.dn] : null;
 
-    // ── Summary label: add SPC risk for storm days or any day with SPC data ──
+    // ── Summary label: add SPC risk tag for Marginal and above only ──
+    // General Thunderstorm (dn=2) is deliberately excluded — it just means
+    // storms are possible somewhere in the broad area and isn't actionable
+    // enough to surface in the collapsed row label. Marginal (dn=3) and above
+    // are the tiers worth flagging so users know to expand for more detail.
     let displayDesc = desc;
-    if (spcInfo && spcInfo.dn >= 3) {
-      // Show SPC risk in the label whenever SPC has Marginal or higher —
-      // regardless of what the weather model says. The SPC outlook is
-      // independent of Open-Meteo's WMO code; a "partly cloudy" model day
-      // can still have a Slight or Enhanced SPC risk.
+    if (spcInfo && spc && spc.dn >= 3) {
       displayDesc = `${desc} · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
-    } else if (isStorm && spcInfo) {
-      displayDesc = `Thunderstorms · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
     } else if (isStorm && spc && spc.dn === null && dayOffset <= 3) {
       displayDesc = 'Thunderstorms · No Severe Risk';
     }
