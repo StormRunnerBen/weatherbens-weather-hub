@@ -3510,10 +3510,18 @@ async function lookupCountyZone(lat, lon) {
   try {
     const res = await fetch(`https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`);
     const d = await res.json();
-    const countyUrl = d.properties?.county; // e.g. "https://api.weather.gov/zones/county/WIC025"
-    if (!countyUrl) return null;
-    const match = countyUrl.match(/county\/([A-Z0-9]+)$/);
-    return match ? match[1] : null;
+    // NWS issues different products against different zone types:
+    //   - Watches (SVA, TOA, FFA) → county zones (KYC227)
+    //   - Warnings (TOR, SVR, FFW) → forecast zones (KYZ070)
+    // We need both to catch everything. Return them as an array.
+    const countyUrl = d.properties?.county;
+    const forecastUrl = d.properties?.forecastZone;
+    const zones = [];
+    const countyMatch = countyUrl?.match(/county\/([A-Z0-9]+)$/);
+    if (countyMatch) zones.push(countyMatch[1]);
+    const forecastMatch = forecastUrl?.match(/zone\/forecast\/([A-Z0-9]+)$/);
+    if (forecastMatch) zones.push(forecastMatch[1]);
+    return zones.length > 0 ? zones : null;
   } catch (e) {
     return null;
   }
@@ -3522,13 +3530,14 @@ async function lookupCountyZone(lat, lon) {
 async function fetchAlerts() {
   if (!currentLocation) return;
   try {
-    // Query by county zone rather than raw point — point queries can miss
-    // small-polygon warnings (tornadoes, severe thunderstorms, flash floods)
-    // due to how NWS geolocates those product types. Fall back to point
-    // query only if the zone lookup itself fails for some reason.
-    const zone = await lookupCountyZone(currentLocation.lat, currentLocation.lon);
-    const alertsUrl = zone
-      ? `https://api.weather.gov/alerts/active?zone=${zone}&status=actual&message_type=alert,update`
+    // Query by both county zone AND forecast zone to catch all alert types.
+    // Watches are issued against county zones (KYC227), while warnings are
+    // issued against forecast zones (KYZ070). Querying only one type misses
+    // the other — e.g. a Severe Thunderstorm Watch won't appear if we only
+    // query the forecast zone.
+    const zones = await lookupCountyZone(currentLocation.lat, currentLocation.lon);
+    const alertsUrl = zones
+      ? `https://api.weather.gov/alerts/active?zone=${zones.join(',')}&status=actual&message_type=alert,update`
       : `https://api.weather.gov/alerts/active?point=${currentLocation.lat},${currentLocation.lon}&status=actual&message_type=alert,update`;
     const res = await fetch(alertsUrl);
     const d = await res.json();
