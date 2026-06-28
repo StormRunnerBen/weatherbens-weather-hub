@@ -23,10 +23,18 @@
     --success: #3ecf8e;
     --text: #e8f0fe;
     --text-muted: #8aa4cc;
-    --border: rgba(77, 184, 255, 0.18);
-    --card: rgba(15, 32, 64, 0.85);
+    --border: rgba(var(--accent-rgb),0.18);
+    --card: rgba(var(--sky-mid-rgb),0.85);
     --mono: 'IBM Plex Mono', monospace;
     --sans: 'IBM Plex Sans', system-ui, sans-serif;
+    /* RGB component variables — used for semi-transparent accent/sky tints
+       so theme switching can update them without hardcoding rgba() everywhere */
+    --accent-rgb: 77, 184, 255;
+    --sky-rgb: 10, 22, 40;
+    --sky-mid-rgb: 15, 32, 64;
+    /* Background glow gradient colors */
+    --glow-1: rgba(var(--accent-rgb),0.07);
+    --glow-2: rgba(244,165,34,0.05);
   }
 
   body {
@@ -43,7 +51,7 @@
     position: fixed;
     inset: 0;
     background:
-      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(77,184,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(var(--accent-rgb),0.07) 0%, transparent 60%),
       radial-gradient(ellipse 60% 40% at 80% 80%, rgba(244,165,34,0.05) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
@@ -265,7 +273,7 @@
   }
   .geolocate-btn:hover {
     border-color: var(--accent);
-    background: rgba(77,184,255,0.06);
+    background: rgba(var(--accent-rgb),0.06);
   }
   .geolocate-btn:disabled { opacity: 0.6; cursor: wait; }
   .geolocate-icon { font-size: 0.95rem; }
@@ -345,7 +353,7 @@
     margin-top: 1rem;
     border: 1px solid rgba(245,255,61,0.25);
     border-radius: 10px;
-    background: linear-gradient(135deg, rgba(245,255,61,0.06), rgba(77,184,255,0.04));
+    background: linear-gradient(135deg, rgba(245,255,61,0.06), rgba(var(--accent-rgb),0.04));
     overflow: hidden;
   }
   .briefing-toggle {
@@ -411,7 +419,7 @@
     gap: 1rem;
     margin-top: 1.25rem;
     padding: 1.1rem 1.25rem;
-    background: linear-gradient(135deg, rgba(245,255,61,0.08), rgba(77,184,255,0.06));
+    background: linear-gradient(135deg, rgba(245,255,61,0.08), rgba(var(--accent-rgb),0.06));
     border: 1px solid rgba(245,255,61,0.25);
     border-radius: 10px;
   }
@@ -877,8 +885,8 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     color: var(--accent);
-    background: rgba(77,184,255,0.1);
-    border: 1px solid rgba(77,184,255,0.25);
+    background: rgba(var(--accent-rgb),0.1);
+    border: 1px solid rgba(var(--accent-rgb),0.25);
     padding: 0.15rem 0.5rem;
     border-radius: 3px;
     flex-shrink: 0;
@@ -1214,10 +1222,10 @@
     -webkit-tap-highlight-color: transparent;
     user-select: none;
   }
-  .hour-card:hover { border-color: rgba(77,184,255,0.4); background: rgba(77,184,255,0.05); }
+  .hour-card:hover { border-color: rgba(var(--accent-rgb),0.4); background: rgba(var(--accent-rgb),0.05); }
   .hour-card.active {
     border-color: var(--accent);
-    background: rgba(77,184,255,0.07);
+    background: rgba(var(--accent-rgb),0.07);
   }
   .hour-card.now {
     border-color: var(--electric);
@@ -1352,7 +1360,7 @@
     overflow: hidden;
     transition: border-color 0.15s ease;
   }
-  .day-card.open { border-color: rgba(77,184,255,0.4); }
+  .day-card.open { border-color: rgba(var(--accent-rgb),0.4); }
   .day-row {
     display: grid;
     grid-template-columns: 40px 28px 1fr auto auto auto;
@@ -1365,8 +1373,8 @@
     -webkit-tap-highlight-color: transparent;
     transition: background 0.12s;
   }
-  .day-row:hover { background: rgba(77,184,255,0.07); }
-  .day-row:active { background: rgba(77,184,255,0.12); }
+  .day-row:hover { background: rgba(var(--accent-rgb),0.07); }
+  .day-row:active { background: rgba(var(--accent-rgb),0.12); }
   .day-name {
     font-size: 0.82rem;
     font-weight: 500;
@@ -1542,7 +1550,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.6rem 1rem;
-    background: rgba(10,22,40,0.9);
+    background: rgba(var(--sky-rgb),0.9);
     border-bottom: 1px solid var(--border);
   }
   .radar-title { font-family: var(--mono); font-size: 0.78rem; color: var(--electric); letter-spacing: 0.05em; }
@@ -1751,7 +1759,7 @@
     transition: border-color 0.15s, background 0.15s;
     position: relative;
   }
-  .loc-card:hover { border-color: rgba(77,184,255,0.4); background: rgba(77,184,255,0.04); }
+  .loc-card:hover { border-color: rgba(var(--accent-rgb),0.4); background: rgba(var(--accent-rgb),0.04); }
   .loc-card.loc-active { border-color: var(--electric); }
 
   .loc-card-top {
@@ -1846,7 +1854,7 @@
     text-align: center;
     line-height: 1.55;
     padding: 0.75rem;
-    background: rgba(77,184,255,0.04);
+    background: rgba(var(--accent-rgb),0.04);
     border: 1px dashed var(--border);
     border-radius: 8px;
   }
@@ -1905,6 +1913,9 @@
       </div>
     </div>
   </header>
+      <div class="theme-options" id="theme-options"></div>
+    </div>
+  </div>
 
   <!-- My Locations slide-in panel -->
   <div id="locations-overlay" onclick="closeLocationsPanel()"></div>
@@ -2923,7 +2934,7 @@ function renderDaily(d, h) {
     // Precipitation timing row — shown as a full-width block below the grid
     // so the time range isn't cramped into a tiny cell.
     const timingHtml = precipTiming ? `
-      <div style="margin-top:0.6rem; padding:0.5rem 0.7rem; background:rgba(77,184,255,0.05); border-radius:6px; border-left:2px solid var(--accent); font-size:0.8rem;">
+      <div style="margin-top:0.6rem; padding:0.5rem 0.7rem; background:rgba(var(--accent-rgb),0.05); border-radius:6px; border-left:2px solid var(--accent); font-size:0.8rem;">
         <span style="color:var(--text-muted); font-size:0.68rem; display:block; margin-bottom:0.15rem; text-transform:uppercase; letter-spacing:0.08em; font-family:var(--mono);">Precipitation Timing</span>
         <span style="color:var(--text);">${precipTiming.label}</span>
         <span style="display:block; font-size:0.68rem; color:var(--text-muted); margin-top:0.2rem;">Based on model data · subject to change</span>
@@ -4333,7 +4344,7 @@ async function loadStormReports() {
 // Bump WHATS_NEW_VERSION whenever a meaningful update ships.
 // Users who have already seen this version won't see it again
 // unless they clear localStorage or the version string changes.
-const WHATS_NEW_VERSION = '2026.07';
+const WHATS_NEW_VERSION = 'v1.2.1';
 const WHATS_NEW_KEY = 'weatherbens_whats_new_seen';
 
 // Versioned changelog — newest version first, immediately preceding version second.
@@ -4343,66 +4354,86 @@ const WHATS_NEW_KEY = 'weatherbens_whats_new_seen';
 // Items: { icon, title, desc, highlight (bool — yellow left border for key additions) }
 const WHATS_NEW_CHANGELOG = [
   {
-    version: '2026.07',
+    version: 'v1.3.0',
+    label: 'Coming soon',
+    items: [
+      {
+        icon: '🎨',
+        title: 'Themes',
+        desc: 'Six color themes to choose from — tap the palette icon in the header to switch. Choose from Midnight Navy (default), Twilight Purple, Deep Forest, Storm Slate, Radar Dark, and Desert Dusk. Your choice is saved automatically.',
+        highlight: true
+      },
+    ]
+  },
+  {
+    version: 'v1.2.1',
     label: 'Current version',
+    fixes: [
+      {
+        title: 'Alerts missing county zone and forecast zone',
+        desc: 'The app was only querying one zone type — watches use county zones while warnings use forecast zones. Now queries both simultaneously so all alert types are captured correctly.'
+      },
+      {
+        title: 'SPC outlook not showing for non-thunderstorm model days',
+        desc: 'The SPC block was gated on the weather model showing a thunderstorm code. Fixed — SPC now shows for any day with Marginal risk or above regardless of the model code.'
+      },
+      {
+        title: 'SPC showing lower tier when multiple outlook polygons overlap',
+        desc: 'The SPC query was taking the first result rather than the highest tier. Fixed — now correctly takes the maximum risk level across all returned polygons.'
+      },
+      {
+        title: 'Precip today showing 0.00" and rain chance showing —%',
+        desc: 'Precip total was using the current hour\'s reading instead of today\'s running total. Rain chance was never being populated. Both now correctly use today\'s daily totals.'
+      },
+      {
+        title: 'Safari — Use My Location not working',
+        desc: 'Safari caches permission denials and requires a page reload after re-enabling location access. The app now detects this and shows specific instructions. Timeout also increased to 20 seconds.'
+      },
+      {
+        title: 'Clothing suggestion always showing "Comfortable layers"',
+        desc: 'Rain gear suggestions were not appearing on thunderstorm days. Fixed — storm days with high rain probability now correctly suggest a rain jacket or umbrella.'
+      },
+    ]
+  },
+  {
+    version: 'v1.2.0',
+    label: 'Previous release',
     items: [
       {
         icon: '🌧',
         title: 'Precipitation Timing',
         desc: 'The 7-day forecast cards now show when rain is expected, not just how likely — e.g. "Rain expected · 10 AM – 2 PM" or "Rain on and off throughout the day, starting around 9 AM." Based on model data and subject to change.',
-        highlight: true
+        highlight: false
       },
       {
         icon: '📊',
         title: 'Rain Chances Chart',
         desc: 'A new 24-hour precipitation probability bar chart in Your Backyard Forecast shows at a glance when rain is coming, with a "next rain" summary at the top.',
-        highlight: true
+        highlight: false
       },
       {
         icon: '🏡',
         title: 'Renamed Sections',
-        desc: '"Morning Briefing" is now Your Day at a Glance — relevant any time of day, not just mornings. The section below it is now called Your Backyard Forecast to better reflect its live, local focus.',
+        desc: '"Morning Briefing" is now Your Day at a Glance — relevant any time of day, not just mornings. The section below it is now called Your Backyard Forecast.',
         highlight: false
       },
       {
         icon: '🌡️',
         title: 'Feels-Like Prominence',
-        desc: 'Feels-like temperature now sits alongside the actual temperature as a co-equal primary reading in Your Backyard Forecast, rather than being buried in the conditions grid.',
+        desc: 'Feels-like temperature now sits alongside the actual temperature as a co-equal primary reading in Your Backyard Forecast.',
         highlight: false
       },
       {
         icon: '⚡',
         title: 'Recent Storm Reports',
         desc: 'Confirmed tornado, hail, and damaging wind reports from NWS Local Storm Reports now appear automatically when there are events within 75 miles of your location in the last 24 hours.',
-        highlight: true
-      },
-    ],
-    fixes: [
-      {
-        title: 'Safari — Use My Location not working',
-        desc: 'Safari caches permission denials and requires a page reload after re-enabling location access. The app now detects this and shows specific instructions for Safari users rather than a generic error message. Timeout also increased to 20 seconds to account for slower GPS acquisition on iOS.'
-      },
-      {
-        title: 'Clothing suggestion always showing "Comfortable layers"',
-        desc: 'Rain gear suggestions were not appearing on thunderstorm days because the storm check was short-circuiting before the rain probability was evaluated. Fixed — storm days with high rain probability now correctly suggest a rain jacket or umbrella.'
-      },
-      {
-        title: 'SPC outlook not showing for non-thunderstorm model days',
-        desc: 'The SPC block in the 7-day cards and Your Day at a Glance was gated on the weather model showing a thunderstorm code. Since SPC outlooks are independent of model conditions, a Slight Risk day the model showed as "Partly Cloudy" would silently show no SPC data. Fixed — SPC now shows for any day with Marginal risk or above regardless of the model code.'
-      },
-      {
-        title: 'SPC showing lower tier when multiple outlook polygons overlap',
-        desc: 'The SPC query could return multiple overlapping polygons (e.g. both a General Thunderstorm and a Slight Risk polygon) and was taking the first result rather than the highest tier. Fixed — the app now correctly takes the maximum risk level across all returned polygons.'
-      },
-      {
-        title: 'Precip today showing 0.00" and rain chance showing —%',
-        desc: 'Precip total was using the current hour\'s reading instead of today\'s running total. Rain chance was never being populated at all — it showed the default placeholder value permanently. Both now correctly use today\'s daily totals from the forecast data.'
+        highlight: false
       },
     ]
   },
   {
-    version: '2026.06',
-    label: 'Previous version',
+    version: 'v1.1.0',
+    label: 'Earlier release',
     items: [
       {
         icon: '📍',
@@ -4429,7 +4460,6 @@ const WHATS_NEW_CHANGELOG = [
         highlight: false
       },
     ]
-    // No fixes in this version entry — omit the fixes key entirely when there's nothing to list
   },
 ];
 
@@ -4437,12 +4467,12 @@ function showWhatsNew(force = false) {
   const seen = localStorage.getItem(WHATS_NEW_KEY);
   if (!force && seen === WHATS_NEW_VERSION) return;
 
-  document.getElementById('wn-version').textContent = `v${WHATS_NEW_VERSION}`;
+  document.getElementById('wn-version').textContent = WHATS_NEW_VERSION;
 
   const sectionsHtml = WHATS_NEW_CHANGELOG.map((section, sIdx) => {
     const isCurrent = sIdx === 0;
 
-    const itemsHtml = section.items.map(item => `
+    const itemsHtml = (section.items || []).map(item => `
       <div class="wn-item${item.highlight ? ' wn-highlight' : ''}">
         <span class="wn-item-icon">${item.icon}</span>
         <div class="wn-item-text">
@@ -4460,15 +4490,16 @@ function showWhatsNew(force = false) {
           <span class="wn-fix-text"><strong>${fix.title}</strong> — ${fix.desc}</span>
         </div>`).join('')}` : '';
 
+    const dividerLabels = ['', 'COMING SOON', 'PREVIOUS RELEASE', 'EARLIER RELEASES'];
     const divider = sIdx > 0 ? `
       <div class="wn-section-divider">
-        <span class="wn-section-divider-label">EARLIER THIS YEAR</span>
+        <span class="wn-section-divider-label">${dividerLabels[sIdx] || 'EARLIER RELEASES'}</span>
       </div>` : '';
 
     return `${divider}
       <div class="wn-version-section">
         <div class="wn-version-header">
-          <span class="wn-version-badge${isCurrent ? ' current' : ''}">v${section.version}</span>
+          <span class="wn-version-badge${isCurrent ? ' current' : ''}">${section.version}</span>
           <span class="wn-version-label">${section.label}</span>
         </div>
         ${itemsHtml}
@@ -4499,7 +4530,7 @@ document.getElementById('whats-new-overlay').addEventListener('click', function(
   if (e.target === this) closeWhatsNew();
 });
 
-// ── What's New init — defer slightly so the page loads first ──
+
 // Fetches current conditions + active alerts for each saved location
 // in parallel when the panel opens. Results are cached for 5 minutes.
 const MAX_FAVORITES = 3;
