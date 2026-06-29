@@ -249,7 +249,73 @@ These can be copied almost verbatim and run server-side in Node.js.
 
 ---
 
-## App Store Distribution (Future Consideration)
+## v2.0.0 — Interactive Radar
+
+The headline feature of the v2.0.0 release. Replaces the current NWS iframe embed with a fully interactive, pannable, zoomable radar map built on **Leaflet.js** with NEXRAD tiles from the **Iowa Environmental Mesonet (IEM)** and/or **RainViewer**.
+
+### Why v2.0.0
+
+Interactive radar is a significant enough architectural addition to warrant a major version. It introduces a third-party map library (Leaflet), a new data source (IEM/RainViewer radar tiles), and a fundamentally different UI paradigm. Everything before this is data display — this is the first true interactive feature.
+
+### Architecture
+
+Maintains the single-file constraint — Leaflet loads from CDN, radar tiles and map base tiles load on demand. No backend required. No API key required (IEM is free and open).
+
+**Stack:**
+- **Leaflet.js** (CDN) — map renderer, zoom/pan, touch handling
+- **IEM NEXRAD tiles** — `mesonet.agron.iastate.edu` composite radar, free, no key
+- **RainViewer API** (optional) — smoother animation, 2hr history, free tier
+- **Existing NWS alert data** — warning polygons rendered directly on the map
+- **Existing LSR storm report data** — markers on the map
+
+### Planned features
+
+**Phase 1 — Core radar (MVP)**
+- Leaflet map centered on user's location
+- IEM NEXRAD composite radar tile layer
+- Zoom and pan with touch support on mobile
+- Auto-centers on current location
+
+**Phase 2 — Animation**
+- Loop through last 6–12 radar frames at ~500ms intervals
+- Play/pause controls
+- Frame timestamp display
+
+**Phase 3 — Overlays**
+- NWS warning polygons (reuse existing alert fetch — just render on map)
+- County/state boundary lines
+- LSR storm report markers (tornado, hail, wind damage)
+
+**Phase 4 — Polish**
+- Loading states so animation doesn't start until tiles are ready
+- Radar legend (dBZ color scale)
+- Mobile-optimized controls
+- Full-screen mode (especially useful post-PWA)
+
+### Prerequisites
+
+- **PWA should be built first** — full-screen interactive radar without browser chrome is dramatically better on mobile. The PWA makes the radar feel native.
+
+### Effort estimate
+
+| Phase | Effort |
+|-------|--------|
+| Core map + radar tiles | 1–2 days |
+| Animation loop | 1 day |
+| Warning polygon overlay | Half day |
+| LSR markers | Half day |
+| Polish + mobile | 1–2 days |
+| **Total** | **~2 focused weekends** |
+
+### Data sources
+
+| Source | What | Cost |
+|--------|------|------|
+| IEM NEXRAD tiles | Radar composites | Free, no key |
+| RainViewer | Animated radar frames | Free tier available |
+| Leaflet.js | Map renderer | Free, open source |
+| NWS API | Warning polygons | Free (already in use) |
+| NOAA LSR MapServer | Storm report markers | Free (already in use) |
 
 Not required for a beta, but good to understand the landscape.
 

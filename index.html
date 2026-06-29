@@ -5172,7 +5172,7 @@ async function fetchLocationWeather(loc) {
   if (cached && (Date.now() - cached.fetchedAt) < LOC_CACHE_TTL) return cached.data;
 
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
-    + `&current=temperature_2m,weather_code,wind_speed_10m`
+    + `&current=temperature_2m,weather_code,wind_speed_10m,precipitation`
     + `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max`
     + `&temperature_unit=fahrenheit&wind_speed_unit=mph`
     + `&timezone=${encodeURIComponent(loc.timezone)}&forecast_days=2&past_days=1`;
@@ -5242,7 +5242,12 @@ async function renderLocationsPanel() {
       const hiF  = daily ? Math.round(daily.temperature_2m_max[1]) : '—';
       const loF  = daily ? Math.round(daily.temperature_2m_min[1]) : '—';
       const rain = daily ? (daily.precipitation_probability_max[1] ?? 0) : '—';
-      const [desc, icon] = wmoInfo(cur.weather_code);
+      const [descRaw, iconRaw] = wmoInfo(cur.weather_code);
+      // Apply storm guard — current hour WMO code can show thunderstorm with 0 precipitation
+      const locIsStorm = [95,96,99].includes(cur.weather_code) && cur.precipitation > 0;
+      const locStormButDry = [95,96,99].includes(cur.weather_code) && !locIsStorm;
+      const desc = locStormButDry ? 'Mostly Sunny' : descRaw;
+      const icon = locStormButDry ? '☀️' : iconRaw;
 
       card.querySelector('.loc-card-loading').outerHTML = `
         <div class="loc-card-main">
