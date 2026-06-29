@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — WeatherBen's Weather Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+// Apply saved theme before first paint to avoid flash of default theme.
+(function() {
+  var THEMES = {
+    'midnight-navy':  {},
+    'twilight-purple': { '--sky':'#12082a','--sky-mid':'#1e0f3f','--sky-light':'#2d1a5e','--accent':'#b39ddb','--accent-warm':'#ff79c6','--electric':'#ff79c6','--text':'#f0eaff','--text-muted':'#9b89c4','--border':'rgba(179,157,219,0.2)','--card':'rgba(30,15,63,0.88)' },
+    'deep-forest':    { '--sky':'#061a0e','--sky-mid':'#0a2e18','--sky-light':'#134d28','--accent':'#22c55e','--accent-warm':'#f59e0b','--electric':'#a3e635','--text':'#ecfdf5','--text-muted':'#6ee7b7','--border':'rgba(34,197,94,0.2)','--card':'rgba(10,46,24,0.88)' },
+    'storm-slate':    { '--sky':'#0f1117','--sky-mid':'#1a1f2e','--sky-light':'#252d3d','--accent':'#94a3b8','--accent-warm':'#f4a522','--electric':'#f5ff3d','--text':'#f1f5f9','--text-muted':'#94a3b8','--border':'rgba(148,163,184,0.18)','--card':'rgba(26,31,46,0.9)' },
+    'radar-dark':     { '--sky':'#050a05','--sky-mid':'#0a140a','--sky-light':'#122012','--accent':'#00ff41','--accent-warm':'#aaff00','--electric':'#39ff14','--text':'#e0ffe0','--text-muted':'#4dbb4d','--border':'rgba(0,255,65,0.18)','--card':'rgba(10,20,10,0.92)' },
+    'desert-dusk':    { '--sky':'#1a0e08','--sky-mid':'#2c1810','--sky-light':'#4a2c1a','--accent':'#f59e0b','--accent-warm':'#fb923c','--electric':'#fbbf24','--text':'#fef3e2','--text-muted':'#c9956a','--border':'rgba(245,158,11,0.2)','--card':'rgba(44,24,16,0.9)' },
+  };
+  try {
+    var saved = localStorage.getItem('weatherbens_theme');
+    if (saved && THEMES[saved]) {
+      var vars = THEMES[saved];
+      var root = document.documentElement;
+      for (var key in vars) root.style.setProperty(key, vars[key]);
+    }
+  } catch(e) {}
+})();
+</script>
+<style>
+  :root {
+    --sky: #0a1628;
+    --sky-mid: #0f2040;
+    --sky-light: #1a3560;
+    --accent: #4db8ff;
+    --electric: #f5ff3d;
+    --danger: #ff4f4f;
+    --warning: #ffd23f;
+    --success: #3ecf8e;
+    --text: #e8f0fe;
+    --text-muted: #8aa4cc;
+    --border: rgba(77, 184, 255, 0.18);
+    --card: rgba(15, 32, 64, 0.85);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--sky);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(77,184,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(244,165,34,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+  }
+  .back-link:hover { opacity: 1; }
+
+  .page-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-title {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .page-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .page-updated {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+
+  .section {
+    margin-bottom: 2.5rem;
+  }
+  .section-title {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.85rem;
+  }
+  .section p {
+    font-size: 0.92rem;
+    color: var(--text);
+    margin-bottom: 0.85rem;
+    line-height: 1.65;
+  }
+  .section p:last-child { margin-bottom: 0; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+    margin: 0.75rem 0;
+  }
+  .data-table th {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+  }
+  .data-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .data-table td:first-child { font-weight: 500; white-space: nowrap; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table a { color: var(--accent); }
+
+  .highlight-box {
+    background: rgba(62, 207, 142, 0.07);
+    border: 1px solid rgba(62, 207, 142, 0.2);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .highlight-box strong { color: var(--success); }
+
+  .note-box {
+    background: rgba(77,184,255,0.06);
+    border: 1px solid rgba(77,184,255,0.15);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .note-box strong { color: var(--text); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  a { color: var(--accent); }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back-link" href="index.html">← Back to WeatherBen's Weather Hub</a>
+
+  <div class="page-header">
+    <div class="page-title">Privacy Policy</div>
+    <div class="page-subtitle">WeatherBen's Weather Hub — weatherbenwxhub.com</div>
+    <div class="page-updated">Last updated: June 2026</div>
+  </div>
+
+  <!-- Summary -->
+  <div class="section">
+    <div class="section-title">The Short Version</div>
+    <div class="highlight-box">
+      <strong>We do not collect, store, sell, or share your personal information.</strong> WeatherBen's Weather Hub is a weather tool, not a data business. Your location is used only to fetch weather for you. Your preferences stay on your device. We do not run ads. We do not have user accounts.
+    </div>
+  </div>
+
+  <!-- What we collect -->
+  <div class="section">
+    <div class="section-title">What Data Is Involved</div>
+    <p>WeatherBen's Weather Hub does not have a backend server or database. No personal information is transmitted to or stored by us. Here is a complete picture of what data flows where when you use the app:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>What happens to it</th>
+          <th>Stored by us?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GPS coordinates</td>
+          <td>Sent to Open-Meteo (weather) and BigDataCloud (reverse geocoding) to look up your local forecast. Never stored by us.</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>City searches</td>
+          <td>Sent to Open-Meteo's geocoding API to find matching cities. Never stored by us.</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Saved locations &amp; theme preference</td>
+          <td>Stored only in your browser's localStorage on your own device. Never transmitted anywhere.</td>
+          <td>No — your device only</td>
+        </tr>
+        <tr>
+          <td>Feedback form submissions</td>
+          <td>If you submit the feedback form, your message and any details you provide are sent to Netlify Forms. This is the only place user-submitted data touches a third-party server.</td>
+          <td>By Netlify only</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- localStorage -->
+  <div class="section">
+    <div class="section-title">Your Browser Storage</div>
+    <p>The app uses your browser's <strong>localStorage</strong> to remember your saved locations, last-searched city, theme preference, and which version of What's New you've seen. This data:</p>
+    <p>— Lives only on your device and is never transmitted to any server<br>
+       — Is not a cookie and does not require consent under most privacy frameworks<br>
+       — Can be cleared at any time through your browser's settings (Settings → Privacy → Clear browsing data, or equivalent)</p>
+    <div class="note-box">
+      <strong>To clear all app data:</strong> In your browser settings, clear site data for weatherbenwxhub.com. This resets saved locations, theme, and all preferences to default.
+    </div>
+  </div>
+
+  <!-- Third parties -->
+  <div class="section">
+    <div class="section-title">Third-Party Services</div>
+    <p>The app fetches weather and map data from several public sources. When you use the app, your IP address and request details may be visible to these services under their own privacy policies:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>What it receives</th>
+          <th>Privacy policy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Open-Meteo</td>
+          <td>Coordinates or city name for weather lookup</td>
+          <td><a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener">open-meteo.com/en/terms</a></td>
+        </tr>
+        <tr>
+          <td>NWS / NOAA</td>
+          <td>Coordinates or zone ID for alerts and radar</td>
+          <td><a href="https://www.noaa.gov/protecting-your-privacy" target="_blank" rel="noopener">noaa.gov/protecting-your-privacy</a></td>
+        </tr>
+        <tr>
+          <td>BigDataCloud</td>
+          <td>GPS coordinates for reverse geocoding (city name lookup)</td>
+          <td><a href="https://www.bigdatacloud.com/privacy-policy" target="_blank" rel="noopener">bigdatacloud.com/privacy-policy</a></td>
+        </tr>
+        <tr>
+          <td>Netlify</td>
+          <td>Hosts the app and receives feedback form submissions</td>
+          <td><a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">netlify.com/privacy</a></td>
+        </tr>
+        <tr>
+          <td>Google Fonts</td>
+          <td>Serves the IBM Plex font family used for display</td>
+          <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Open-Meteo is designed with privacy in mind and does not store personal data. All NWS and NOAA services are operated by the US federal government under their privacy framework.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- No ads -->
+  <div class="section">
+    <div class="section-title">Advertising</div>
+    <p>WeatherBen's Weather Hub does not display advertisements and does not work with any advertising networks. No tracking pixels, ad scripts, or behavioral targeting of any kind are present in the app.</p>
+  </div>
+
+  <!-- CCPA -->
+  <div class="section">
+    <div class="section-title">California Residents (CCPA)</div>
+    <p>Under the California Consumer Privacy Act, California residents have the right to know what personal information is collected about them and to request that it be deleted.</p>
+    <p>WeatherBen's Weather Hub does not collect, sell, or share personal information as defined by the CCPA. We have no personal information to disclose or delete. If you submitted feedback through our feedback form, that data is held by Netlify — you can contact us at the address below to request its removal.</p>
+  </div>
+
+  <!-- GDPR -->
+  <div class="section">
+    <div class="section-title">European Users (GDPR)</div>
+    <p>WeatherBen's Weather Hub is primarily designed for US users and US weather data coverage. If you are accessing the app from the European Union or European Economic Area, the following applies:</p>
+    <p><strong>Legal basis for processing:</strong> When you use the "Use My Location" feature, your GPS coordinates are processed on the basis of your explicit consent (you choose to tap the button and grant location permission). Coordinates are used solely to fetch local weather and are not retained by us.</p>
+    <p><strong>Data minimization:</strong> The app is designed to use the minimum data necessary. Location is never stored server-side. Preferences are stored locally on your device only.</p>
+    <p><strong>Your rights:</strong> Under GDPR you have the right to access, rectify, or erase personal data held about you. Since we hold no personal data server-side, there is nothing to access or erase on our end. For data held by third-party services (Netlify, Open-Meteo, etc.), please refer to their respective privacy policies linked above.</p>
+    <div class="note-box">
+      <strong>Note:</strong> Full GDPR compliance tooling (consent management, Data Processing Agreements with all processors, formal records of processing activities) will be implemented if and when the app expands to intentionally serve EU users at scale.
+    </div>
+  </div>
+
+  <!-- Children -->
+  <div class="section">
+    <div class="section-title">Children's Privacy</div>
+    <p>WeatherBen's Weather Hub does not knowingly collect any personal information from children under the age of 13. The app does not have user accounts or registration of any kind.</p>
+  </div>
+
+  <!-- Changes -->
+  <div class="section">
+    <div class="section-title">Changes to This Policy</div>
+    <p>If this privacy policy changes in a meaningful way, the "Last updated" date at the top of this page will be updated. Since the app collects no personal information, changes to this policy are unlikely to affect your privacy in practice.</p>
+  </div>
+
+  <!-- Contact -->
+  <div class="section">
+    <div class="section-title">Contact</div>
+    <p>Questions about this privacy policy or the app's data practices? Use the <a href="feedback.html">feedback form</a> and select "Other" as the topic, or reach out directly through the app.</p>
+  </div>
+
+  <footer>
+    WeatherBen's Weather Hub is not an official weather source and is not affiliated with NWS, NOAA, or any government agency.<br>
+    <a href="index.html">← Back to the app</a> · <a href="guide.html">How to Use</a> · <a href="feedback.html">Send Feedback</a>
+  </footer>
+
+</div>
+</body>
+</html>
