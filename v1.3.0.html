@@ -3565,13 +3565,23 @@ function renderBriefing(daily, current) {
   const todayLow = Math.round(daily.temperature_2m_min[1]);
   const todayRain = daily.precipitation_probability_max[1];
   const todayCode = daily.weather_code[1];
-  const [todayDesc] = wmoInfo(todayCode);
+  const todayPrecipSum = daily.precipitation_sum ? daily.precipitation_sum[1] : null;
+  const todayStorm = [95,96,99].includes(todayCode) && todayRain >= 30 && (todayPrecipSum === null || todayPrecipSum > 0);
+  const [todayDescRaw] = wmoInfo(todayCode);
+  const todayDesc = (!todayStorm && [95,96,99].includes(todayCode))
+    ? (todayRain >= 15 ? 'Isolated Storm Chance' : 'Mostly Sunny')
+    : todayDescRaw;
 
   const tmrwHigh = Math.round(daily.temperature_2m_max[2]);
   const tmrwLow = Math.round(daily.temperature_2m_min[2]);
   const tmrwRain = daily.precipitation_probability_max[2];
   const tmrwCode = daily.weather_code[2];
-  const [tmrwDesc] = wmoInfo(tmrwCode);
+  const tmrwPrecipSum = daily.precipitation_sum ? daily.precipitation_sum[2] : null;
+  const tmrwStorm = [95,96,99].includes(tmrwCode) && tmrwRain >= 30 && (tmrwPrecipSum === null || tmrwPrecipSum > 0);
+  const [tmrwDescRaw] = wmoInfo(tmrwCode);
+  const tmrwDesc = (!tmrwStorm && [95,96,99].includes(tmrwCode))
+    ? (tmrwRain >= 15 ? 'Isolated Storm Chance' : 'Mostly Sunny')
+    : tmrwDescRaw;
 
   const windMph = current ? Math.round(current.wind_speed_10m) : 0;
 
