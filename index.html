@@ -1590,7 +1590,7 @@
     line-height: 1.5;
     border-left: 3px solid var(--border);
   }
-  .day-context-card.heat-extreme { background: rgba(255,100,0,0.1); border-left-color: #ff6400; }
+  .day-context-card.heat-extreme { background: rgba(var(--accent-rgb),0.08); border-left-color: var(--electric); }
   .day-context-card.heat-warm    { background: rgba(255,180,0,0.08); border-left-color: var(--warning); }
   .day-context-card.nice-day     { background: rgba(62,207,142,0.07); border-left-color: var(--success); }
   .day-context-title {
@@ -1601,7 +1601,7 @@
     display: block;
     margin-bottom: 0.25rem;
   }
-  .day-context-card.heat-extreme .day-context-title { color: #ff6400; }
+  .day-context-card.heat-extreme .day-context-title { color: var(--electric); }
   .day-context-card.heat-warm    .day-context-title { color: var(--warning); }
   .day-context-card.nice-day     .day-context-title { color: var(--success); }
   .day-context-body { color: var(--text); }
@@ -3546,7 +3546,7 @@ function renderDaily(d, h) {
     // Precipitation timing row — shown as a full-width block below the grid
     // so the time range isn't cramped into a tiny cell.
     const timingHtml = precipTiming ? `
-      <div style="margin-top:0.6rem; padding:0.5rem 0.7rem; background:rgba(var(--accent-rgb),0.05); border-radius:6px; border-left:2px solid var(--accent); font-size:0.8rem;">
+      <div style="margin-top:0.6rem; padding:0.5rem 0.7rem; background:rgba(var(--accent-rgb),0.05); border-radius:6px; border-left:2px solid var(--electric); font-size:0.8rem;">
         <span style="color:var(--text-muted); font-size:0.68rem; display:block; margin-bottom:0.15rem; text-transform:uppercase; letter-spacing:0.08em; font-family:var(--mono);">Precipitation Timing</span>
         <span style="color:var(--text);">${precipTiming.label}</span>
         <span style="display:block; font-size:0.68rem; color:var(--text-muted); margin-top:0.2rem;">Based on model data · subject to change</span>
@@ -5405,7 +5405,7 @@ const THEMES = [
   {
     id: 'deep-forest', name: 'Deep Forest', desc: 'Dark walnut, amber & woodland green',
     swatches: ['#1a1208', '#e8830a', '#7cc648'],
-    vars: { '--sky':'#1a1208','--sky-mid':'#2a1e0e','--sky-light':'#3d2e18','--accent':'#e8830a','--accent-warm':'#a0522d','--electric':'#7cc648','--text':'#f0e6d0','--text-muted':'#9a7a5a','--border':'rgba(124, 198, 72, 0.2)','--card':'rgba(42, 30, 14, 0.92)','--accent-rgb':'232, 131, 10','--sky-rgb':'26, 18, 8','--sky-mid-rgb':'42, 30, 14','--glow-1':'rgba(124,198,72,0.08)','--glow-2':'rgba(232,131,10,0.05)' }
+    vars: { '--sky':'#1a1208','--sky-mid':'#2a1e0e','--sky-light':'#3d2e18','--accent':'#e8830a','--accent-warm':'#a0522d','--electric':'#7cc648','--text':'#f0e6d0','--text-muted':'#9a7a5a','--border':'rgba(124, 198, 72, 0.2)','--card':'rgba(42, 30, 14, 0.92)','--accent-rgb':'124, 198, 72','--sky-rgb':'26, 18, 8','--sky-mid-rgb':'42, 30, 14','--glow-1':'rgba(124,198,72,0.08)','--glow-2':'rgba(232,131,10,0.05)' }
   },
   {
     id: 'storm-slate', name: 'Storm Slate', desc: 'Deep charcoal, electric yellow',
