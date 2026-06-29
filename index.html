@@ -3360,10 +3360,11 @@ function renderDaily(d, h) {
         if (!spcHtml) spcHtml = `<div class="day-detail-note">SPC outlook data unavailable — <a href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">check SPC directly ↗</a></div>`;
       }
 
-      // Hail context from model codes — still relevant even when SPC data is shown
-      if (code === 96) {
+      // Hail context — only show when rain probability supports it,
+      // same guard as isStorm. WMO codes 96/99 can appear on dry days.
+      if (code === 96 && rainPct >= 30 && (dayPrecipSum === null || dayPrecipSum > 0)) {
         spcHtml += `<div class="day-detail-hail">Model indicates slight hail possible (typically under ¾"). Actual hail risk depends on storm development — monitor NWS alerts.</div>`;
-      } else if (code === 99) {
+      } else if (code === 99 && rainPct >= 30 && (dayPrecipSum === null || dayPrecipSum > 0)) {
         spcHtml += `<div class="day-detail-hail">Model indicates significant hail possible (¾" or larger). Consider protecting vehicles and monitoring NWS alerts as the day approaches.</div>`;
       }
     } else {
@@ -4892,6 +4893,10 @@ const WHATS_NEW_CHANGELOG = [
       {
         title: 'Theme not carrying over to How to Use and Feedback pages',
         desc: 'Switching themes in the main app had no effect on the guide or feedback pages. Both pages now read your saved theme and apply it before the page renders, with no flash of the wrong theme.'
+      },
+      {
+        title: 'Hail warning appearing on clear days with 5% rain chance',
+        desc: 'WMO weather codes 96 and 99 (hail codes) were triggering a hail advisory note regardless of rain probability or expected precipitation. The note now applies the same 30% rain probability guard as the rest of the storm logic.'
       },
       {
         title: '7-day cards showing "SPC: No Severe Risk" on hot clear days',
