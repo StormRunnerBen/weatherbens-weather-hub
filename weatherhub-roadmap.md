@@ -350,14 +350,21 @@ PWA → Play Store TWA is a natural progression and relatively low-friction. App
 5. **Done:** Feels-Like and Humidity Prominence — feels-like co-equal with actual temp; humidity card with dew point comfort level and heat safety context
 6. **Done — v1.3.0:** Navigation menu, Themes (6 options), Humidity & Heat Prominence
 7. **Done — v1.3.1 (current):** Hourly storm icon guard, Day at a Glance storm guard, theme persistence to guide/feedback pages, context-aware day cards replacing SPC No Severe Risk, header star for saving locations
+8. **Done — v1.3.2:** Privacy policy page with CCPA and GDPR sections, linked from nav menu and all page footers
+9. **Target for v1.3.3 (next patch):**
+   - Tornado Emergency pulsing alert — purple family matching PDS, 2s medium pulse on both the notify banner and expanded alert card, clearly distinguishing Tornado Emergency from all other alert tiers
 8. **Target for v1.4.0:**
    - **Expand saved locations from 3 to 6** — `MAX_FAVORITES` constant change plus responsive My Locations panel layout (see note below)
-   - Recent SPC storm reports — already built, needs guide/changelog entry
-   - Winter weather precipitation breakdown — high seasonal value for Midwest users
+   - **Glossary page** — standalone `glossary.html` accessible from the nav menu, covering: Watch vs. Warning vs. Advisory, alert tiers (Tornado Emergency → PDS → Observed → Radar Indicated), SPC risk levels (Marginal → High), SPC General Thunder, EF Scale (EF0–EF5), IBW tags (Considerable, Destructive), dew point comfort levels, precipitation probability, and feels-like temperature. Contextual ⓘ info links next to unfamiliar terms on the main page linking directly to the relevant glossary section.
+   - **SPC storm reports guide and changelog entry** — feature already built and live, needs formal documentation in the guide page and a What's New entry
+   - **Gruvbox Dark theme** — warm retro terminal aesthetic; dark brown base (#1d2021), cream text (#ebdbb2), aqua accent (#83a598), signature gold electric (#fabd2f). Seventh theme option in the menu.
+   - **Coastal Dusk theme** — deep navy base (#0d1b2a), dusty rose accent (#e8a0b0), coral-pink electric (#f48fb1), warm off-white text (#fce4ec). Eighth theme option in the menu.
+   - **SPC storm reports guide and changelog entry** — feature is already built and live, needs documentation catch-up
 9. **Near term after v1.4.0:** Build the PWA (manifest + service worker + icons) — one weekend
-10. **If growth warrants it:** Add Play Store distribution via TWA
-11. **If growth warrants it:** Build the push notification backend
-12. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
+10. **v2.0.0:** Interactive radar — Leaflet.js + IEM NEXRAD tiles + animation + warning polygon overlay (PWA should be built first)
+11. **If growth warrants it:** Add Play Store distribution via TWA
+12. **If growth warrants it:** Build the push notification backend
+13. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
 
 ### Note: My Locations panel layout for 6 locations
 

@@ -585,15 +585,26 @@
     box-shadow: 0 0 10px rgba(255,79,79,0.3);
   }
   .alert-item.tor-emergency {
-    background: rgba(120,0,0,0.45);
-    border: 2px solid #ff1a1a;
-    color: #ffffff;
-    box-shadow: 0 0 16px rgba(255,26,26,0.55);
-    animation: emergency-pulse 1.8s ease-in-out infinite;
+    background: rgba(120,0,160,0.35);
+    border: 2px solid rgba(200,80,255,0.7);
+    color: #f0ddff;
+    animation: tor-emergency-pulse 2s ease-in-out infinite,
+               tor-emergency-border 2s ease-in-out infinite;
   }
-  @keyframes emergency-pulse {
-    0%, 100% { box-shadow: 0 0 16px rgba(255,26,26,0.55); }
-    50% { box-shadow: 0 0 26px rgba(255,26,26,0.85); }
+  @keyframes tor-emergency-pulse {
+    0%   { box-shadow: 0 0 8px rgba(160,0,200,0.6), 0 0 20px rgba(160,0,200,0.3); background: rgba(120,0,160,0.35); }
+    50%  { box-shadow: 0 0 22px rgba(200,0,255,0.9), 0 0 50px rgba(160,0,200,0.5); background: rgba(160,0,200,0.55); }
+    100% { box-shadow: 0 0 8px rgba(160,0,200,0.6), 0 0 20px rgba(160,0,200,0.3); background: rgba(120,0,160,0.35); }
+  }
+  @keyframes tor-emergency-border {
+    0%   { border-color: rgba(200,80,255,0.7); }
+    50%  { border-color: rgba(240,180,255,0.95); }
+    100% { border-color: rgba(200,80,255,0.7); }
+  }
+  /* Notify banner pulse for Tornado Emergency */
+  .notify-banner.tor-emergency-active {
+    animation: tor-emergency-pulse 2s ease-in-out infinite,
+               tor-emergency-border 2s ease-in-out infinite;
   }
   .tag-pill {
     display: inline-block;
@@ -607,9 +618,9 @@
     vertical-align: middle;
   }
   .tag-pds { background: #fff; color: #791f1f; }
-  .tag-emergency { background: #ff1a1a; color: #fff; }
+  .tag-emergency { background: #cc44ff; color: #fff; }
   .alert-item.tor-pds .alert-pill { background: #ff1a1a; }
-  .alert-item.tor-emergency .alert-pill { background: #ffffff; color: #791f1f; }
+  .alert-item.tor-emergency .alert-pill { background: #ffffff; color: #6a00aa; }
   .alert-item.sev-warning {
     background: rgba(255,210,63,0.10);
     border: 1px solid rgba(255,210,63,0.35);
@@ -4258,14 +4269,14 @@ let latestCurrent = null;
 // Banner color themes keyed by alert tier.
 // Each theme: bg (banner background), text (banner text), btnBg, btnText.
 const BANNER_THEMES = {
-  'tor-emergency': { bg: '#4a0050', text: '#f9d0fc', btnBg: '#cc00cc', btnText: '#fff' },
-  'tor-pds':       { bg: '#5c0000', text: '#ffd5d5', btnBg: '#cc0000', btnText: '#fff' },
-  'tor-confirmed': { bg: '#6b1010', text: '#ffe8e8', btnBg: '#b01a1a', btnText: '#fff' },
-  'tor-radar':     { bg: '#7a1a00', text: '#ffd8c8', btnBg: '#c03000', btnText: '#fff' },
-  'sev-warning':   { bg: '#3d3000', text: '#fff3a0', btnBg: '#998000', btnText: '#111' },
-  'sev-flood':     { bg: '#003d1a', text: '#b8f5c8', btnBg: '#00803a', btnText: '#fff' },
-  'watch':         { bg: '#2d2d00', text: '#ffe87a', btnBg: '#666600', btnText: '#fff' },
-  'default':       { bg: '#fff4c2', text: '#4a3c00', btnBg: '#4a3c00', btnText: '#fff4c2' },
+  'tor-emergency': { bg: '#4a0060', text: '#f0ddff', btnBg: '#cc44ff', btnText: '#fff', pulse: true },
+  'tor-pds':       { bg: '#5c0000', text: '#ffd5d5', btnBg: '#cc0000', btnText: '#fff', pulse: false },
+  'tor-confirmed': { bg: '#6b1010', text: '#ffe8e8', btnBg: '#b01a1a', btnText: '#fff', pulse: false },
+  'tor-radar':     { bg: '#7a1a00', text: '#ffd8c8', btnBg: '#c03000', btnText: '#fff', pulse: false },
+  'sev-warning':   { bg: '#3d3000', text: '#fff3a0', btnBg: '#998000', btnText: '#111', pulse: false },
+  'sev-flood':     { bg: '#003d1a', text: '#b8f5c8', btnBg: '#00803a', btnText: '#fff', pulse: false },
+  'watch':         { bg: '#2d2d00', text: '#ffe87a', btnBg: '#666600', btnText: '#fff', pulse: false },
+  'default':       { bg: '#fff4c2', text: '#4a3c00', btnBg: '#4a3c00', btnText: '#fff4c2', pulse: false },
 };
 
 function notifyThemeForAlert(f) {
@@ -4325,6 +4336,8 @@ function updateNotifyBanner(relevant) {
   banner.style.setProperty('--nb-text', theme.text);
   banner.style.setProperty('--nb-btn-bg', theme.btnBg);
   banner.style.setProperty('--nb-btn-text', theme.btnText);
+  // Pulse the banner for Tornado Emergency only
+  banner.classList.toggle('tor-emergency-active', !!theme.pulse);
 
   banner.dataset.currentKey = alertKey;
   banner.classList.add('show');
@@ -4997,7 +5010,7 @@ async function loadStormReports() {
 // Bump WHATS_NEW_VERSION whenever a meaningful update ships.
 // Users who have already seen this version won't see it again
 // unless they clear localStorage or the version string changes.
-const WHATS_NEW_VERSION = 'v1.3.1';
+const WHATS_NEW_VERSION = 'v1.3.3';
 const WHATS_NEW_KEY = 'weatherbens_whats_new_seen';
 
 // Versioned changelog — newest version first, immediately preceding version second.
@@ -5005,8 +5018,28 @@ const WHATS_NEW_KEY = 'weatherbens_whats_new_seen';
 // version's entry as the second, and remove anything older.
 const WHATS_NEW_CHANGELOG = [
   {
-    version: 'v1.3.1',
+    version: 'v1.3.3',
     label: 'Current version',
+    fixes: [
+      {
+        title: 'Tornado Emergency alert now pulses purple',
+        desc: 'Tornado Emergency alerts now pulse in the same purple family as PDS Tornado Warnings, making them unmistakably distinct from all other alert tiers. The pulse applies to both the notify banner and expanded alert card. PDS stays static purple — the pulse alone signals the highest severity.'
+      },
+    ]
+  },
+  {
+    version: 'v1.3.2',
+    label: 'Previous release',
+    fixes: [
+      {
+        title: 'Privacy policy added',
+        desc: 'A plain-English privacy policy now covers what data is and isn\'t collected, how localStorage is used, third-party services, CCPA, and GDPR. Accessible from the nav menu and all page footers.'
+      },
+    ]
+  },
+  {
+    version: 'v1.3.1',
+    label: 'Earlier release',
     fixes: [
       {
         title: 'Hourly strip showing thunderstorm icon with 0% rain',
@@ -5018,21 +5051,17 @@ const WHATS_NEW_CHANGELOG = [
       },
       {
         title: 'Theme not carrying over to How to Use and Feedback pages',
-        desc: 'Switching themes in the main app had no effect on the guide or feedback pages. Both pages now read your saved theme and apply it before the page renders, with no flash of the wrong theme.'
-      },
-      {
-        title: 'Hail warning appearing on clear days with 5% rain chance',
-        desc: 'WMO weather codes 96 and 99 (hail codes) were triggering a hail advisory note regardless of rain probability or expected precipitation. The note now applies the same 30% rain probability guard as the rest of the storm logic.'
+        desc: 'Both pages now read your saved theme and apply it before the page renders, with no flash of the wrong theme.'
       },
       {
         title: '7-day cards showing "SPC: No Severe Risk" on hot clear days',
-        desc: 'Expanded day cards showed a generic "No Severe Risk" block when there was no storm activity. Replaced with context-aware cards: Extreme Heat (feels-like 100°F+), Warm Day Ahead (88°F+), or Great Day to Be Outside (mild, low rain). SPC risk blocks still appear normally when there is a Marginal or higher outlook.'
+        desc: 'Replaced with context-aware cards: Extreme Heat (feels-like 100°F+), Warm Day Ahead (88°F+), or Great Day to Be Outside (mild, low rain). SPC risk blocks still appear normally when there is a Marginal or higher outlook.'
       },
     ]
   },
   {
     version: 'v1.3.0',
-    label: 'Previous release',
+    label: 'Earlier release',
     items: [
       {
         icon: '☰',
@@ -5051,28 +5080,6 @@ const WHATS_NEW_CHANGELOG = [
         title: 'Humidity & Heat Prominence',
         desc: 'The humidity card now shows a plain-English comfort level based on dew point, color-coded from Comfortable to Dangerous. On hot days (feels-like 90°F+), a heat safety context line appears below the temperature.',
         highlight: false
-      },
-    ]
-  },
-  {
-    version: 'v1.2.2',
-    label: 'Earlier release',
-    fixes: [
-      {
-        title: 'Weather data not loading after v1.2.1 update',
-        desc: 'A variable was referenced before it was declared, causing a silent error that prevented all weather data from loading.'
-      },
-      {
-        title: 'Sunny days incorrectly showing as thunderstorms',
-        desc: "Open-Meteo's daily weather code can assign a thunderstorm code even when rain probability is near zero. Now requires 30%+ rain probability and non-zero precipitation before showing storm messaging."
-      },
-      {
-        title: 'Mobile font sizes too small',
-        desc: 'Increased base font size on mobile and set minimum size floors on small text elements.'
-      },
-      {
-        title: 'Feedback form device/browser field improved',
-        desc: 'Split into separate Device and Browser dropdowns with an optional text field for "Other" browser.'
       },
     ]
   },
@@ -5396,9 +5403,9 @@ const THEMES = [
     vars: { '--sky':'#12082a','--sky-mid':'#1e0f3f','--sky-light':'#2d1a5e','--accent':'#b39ddb','--accent-warm':'#ff79c6','--electric':'#ff79c6','--text':'#f0eaff','--text-muted':'#9b89c4','--border':'rgba(179, 157, 219, 0.2)','--card':'rgba(30, 15, 63, 0.88)','--accent-rgb':'179, 157, 219','--sky-rgb':'18, 8, 42','--sky-mid-rgb':'30, 15, 63','--glow-1':'rgba(179,157,219,0.09)','--glow-2':'rgba(255,121,198,0.06)' }
   },
   {
-    id: 'deep-forest', name: 'Deep Forest', desc: 'Dark evergreen, neon lime',
-    swatches: ['#061a0e', '#22c55e', '#a3e635'],
-    vars: { '--sky':'#061a0e','--sky-mid':'#0a2e18','--sky-light':'#134d28','--accent':'#22c55e','--accent-warm':'#f59e0b','--electric':'#a3e635','--text':'#ecfdf5','--text-muted':'#6ee7b7','--border':'rgba(34, 197, 94, 0.2)','--card':'rgba(10, 46, 24, 0.88)','--accent-rgb':'34, 197, 94','--sky-rgb':'6, 26, 14','--sky-mid-rgb':'10, 46, 24','--glow-1':'rgba(34,197,94,0.08)','--glow-2':'rgba(163,230,53,0.05)' }
+    id: 'deep-forest', name: 'Deep Forest', desc: 'Dark walnut, amber & woodland green',
+    swatches: ['#1a1208', '#e8830a', '#7cc648'],
+    vars: { '--sky':'#1a1208','--sky-mid':'#2a1e0e','--sky-light':'#3d2e18','--accent':'#e8830a','--accent-warm':'#a0522d','--electric':'#7cc648','--text':'#f0e6d0','--text-muted':'#9a7a5a','--border':'rgba(124, 198, 72, 0.2)','--card':'rgba(42, 30, 14, 0.92)','--accent-rgb':'232, 131, 10','--sky-rgb':'26, 18, 8','--sky-mid-rgb':'42, 30, 14','--glow-1':'rgba(124,198,72,0.08)','--glow-2':'rgba(232,131,10,0.05)' }
   },
   {
     id: 'storm-slate', name: 'Storm Slate', desc: 'Deep charcoal, electric yellow',
