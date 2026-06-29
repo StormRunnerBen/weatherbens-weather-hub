@@ -2851,14 +2851,26 @@ function renderDaily(d, h) {
     const uvMax    = d.uv_index_max         ? d.uv_index_max[i].toFixed(1)         : null;
     const sunrise  = d.sunrise ? d.sunrise[i] : null;
 
+    // When the WMO code is a storm code (95/96/99) but the guard fails —
+    // meaning rain probability and/or precip sum don't support a real storm —
+    // substitute a more accurate description based on cloud cover context
+    // rather than showing "Thunderstorm" on what is effectively a hot, dry day.
+    const stormCodeButDry = [95, 96, 99].includes(code) && !isStorm;
+    const effectiveDesc = stormCodeButDry
+      ? (rainPct >= 15 ? 'Isolated Storm Chance' : 'Mostly Sunny')
+      : desc;
+    const effectiveIcon = stormCodeButDry
+      ? (rainPct >= 15 ? '⛅' : '☀️')
+      : icon;
+
     // ── Summary label: add SPC risk tag for Marginal and above only ──
-    let displayDesc = desc;
+    let displayDesc = effectiveDesc;
     const isHotDay = hiF >= 88 || (feelsHi && feelsHi >= 95);
     if (isHotDay && feelsHi && feelsHi > hiF && !spcInfo) {
-      displayDesc = `${desc} · Feels like ${feelsHi}°`;
+      displayDesc = `${effectiveDesc} · Feels like ${feelsHi}°`;
     }
     if (spcInfo && spc && spc.dn >= 3) {
-      displayDesc = `${desc} · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
+      displayDesc = `${effectiveDesc} · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
     } else if (isStorm && spc && spc.dn === null && dayOffset <= 3) {
       displayDesc = 'Thunderstorms · No Severe Risk';
     }
@@ -2977,7 +2989,7 @@ function renderDaily(d, h) {
     card.innerHTML = `
       <div class="day-row" onclick="toggleDayCard(this)">
         <span class="day-name">${dayName}</span>
-        <span class="day-icon">${icon}</span>
+        <span class="day-icon">${effectiveIcon}</span>
         <span class="day-desc">${displayDesc}</span>
         <span class="day-rain">${rainPct}%🌧</span>
         <span class="day-temps">${hiF}° <span class="day-lo">/ ${loF}°</span></span>
