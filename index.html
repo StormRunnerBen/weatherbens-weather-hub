@@ -2821,11 +2821,17 @@ function renderDaily(d, h) {
     const dayName = i === 1 ? 'Today' : days[dt.getDay()];
     const code = d.weather_code[i];
     const [desc, icon] = wmoInfo(code);
-    const isStorm = [95, 96, 99].includes(code);
 
     const hiF = Math.round(d.temperature_2m_max[i]);
     const loF = Math.round(d.temperature_2m_min[i]);
     const rainPct = d.precipitation_probability_max[i] ?? 0;
+    // Apply the same storm guard as pickSummary — WMO code alone is unreliable.
+    // Require meaningful rain probability AND non-zero precip sum before treating
+    // as a storm day in the card label and SPC block display logic.
+    const dayPrecipSum = d.precipitation_sum ? d.precipitation_sum[i] : null;
+    const isStorm = [95, 96, 99].includes(code)
+      && rainPct >= 30
+      && (dayPrecipSum === null || dayPrecipSum > 0);
 
     // ── SPC outlook for this day (Days 1-3 only) ──
     const dayOffset = i;
@@ -2998,13 +3004,16 @@ function toggleDayCard(rowEl) {
 // Picks a phrase bank based on rain chance + weather code, then fills in
 // the actual high temp and rain % for today. A few options per bucket so
 // it doesn't feel like the exact same line every single day.
-function pickSummary(code, rainProb, highF, feelsLikeHigh) {
-  // Guard isStorm with a rain probability check — Open-Meteo's daily WMO code
-  // picks the highest severity across ALL hours including low-probability nighttime
-  // cells, so a day with 10% rain chance can get coded as "Thunderstorm" if one
-  // hourly slot briefly crosses the threshold. Requiring rainProb >= 25 prevents
-  // a sunny/hot day from being mislabeled as a storm day.
-  const isStorm = [95, 96, 99].includes(code) && rainProb >= 25;
+function pickSummary(code, rainProb, highF, feelsLikeHigh, precipSum) {
+  // Guard isStorm against low rain probability AND zero precip sum.
+  // Open-Meteo's daily WMO code can assign a thunderstorm code even when
+  // rain probability is near zero — the code and probability fields come from
+  // different model outputs that don't always agree. We require BOTH a
+  // meaningful rain probability (>=30%) AND some expected precipitation (>0)
+  // before showing storm messaging.
+  const isStorm = [95, 96, 99].includes(code)
+    && rainProb >= 30
+    && (precipSum === null || precipSum === undefined || precipSum > 0);
   const isSnow = [71, 73, 75, 77, 85, 86].includes(code);
   const isRain = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) || rainProb >= 50;
   const isFog = [45, 48].includes(code);
@@ -3095,8 +3104,9 @@ function renderDaySummary(daily, current) {
   const rainProb = daily.precipitation_probability_max[1];
   const code = daily.weather_code[1];
   const feelsLikeHigh = daily.apparent_temperature_max ? Math.round(daily.apparent_temperature_max[1]) : null;
+  const precipSum = daily.precipitation_sum ? daily.precipitation_sum[1] : null;
 
-  const { icon, line } = pickSummary(code, rainProb, highF, feelsLikeHigh);
+  const { icon, line } = pickSummary(code, rainProb, highF, feelsLikeHigh, precipSum);
 
   document.getElementById('summary-icon').textContent = icon;
   document.getElementById('summary-headline').innerHTML = line;
@@ -3122,7 +3132,7 @@ function renderDaySummary(daily, current) {
 // Reuses the same daily/current payload already fetched for the rest of
 // the page (no extra network call) and the alerts cached by fetchAlerts().
 function clothingSuggestion(highF, lowF, code, rainProb, windMph) {
-  const isStorm = [95, 96, 99].includes(code);
+  const isStorm = [95, 96, 99].includes(code) && rainProb >= 30;
   const isSnow = [71, 73, 75, 77, 85, 86].includes(code);
   // Count rain codes OR any meaningful rain probability (lowered to 30% —
   // the daily max can stay below 50% even on noticeably rainy days when
