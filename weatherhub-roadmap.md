@@ -12,7 +12,7 @@ The current tool is a fully functional, single-file weather app deployed on Netl
 - NWS severe weather alerts with polygon-accurate filtering, IBW tier classification, and full NWS report detail on tap
 - SPC Convective Outlook integration for Days 1–3 on storm days
 - Live NEXRAD radar via NWS
-- Morning Briefing summary card
+- Your Day at a Glance — collapsible daily summary with today/tomorrow forecast, rain timing, active alert status, and a clothing suggestion
 - Clickable 7-day forecast cards with expanded detail, including hail context
 - Severity-matched alert notification banner
 - Beta disclaimer, guide page, and Netlify Forms feedback form
@@ -280,15 +280,17 @@ PWA → Play Store TWA is a natural progression and relatively low-friction. App
 1. **Done:** Netlify Forms feedback form — live and collecting submissions
 2. **Done:** Hourly forecast detail — tappable hour cards with feels-like, wind, and precipitation detail
 3. **Done:** Saved locations / My Locations panel — up to 3 locations with live conditions and alert badges
-4. **Done:** Precipitation timing — 7-day cards show when rain is expected, not just how likely; 24-hour rain chances chart in Your Backyard Forecast
-5. **Next (any order, all no-backend):**
-   - Feels-like and humidity prominence — half a day, immediate impact
-   - Recent SPC storm reports — differentiating feature, verify CORS first
+4. **Done:** Precipitation timing — 7-day cards show when rain is expected; 24-hour rain chances chart in Your Backyard Forecast
+5. **Done:** Feels-Like and Humidity Prominence — feels-like co-equal with actual temp; humidity card with dew point comfort level and heat safety context
+6. **Done — v1.3.0:** Navigation menu, Themes (6 options), Humidity & Heat Prominence
+7. **Done — v1.3.1 (current):** Hourly storm icon guard, Day at a Glance storm guard, theme persistence to guide/feedback pages, context-aware day cards replacing SPC No Severe Risk
+7. **Near term after v1.3.0:** Build the PWA (manifest + service worker + icons) — one weekend
+8. **Remaining near-term features (queue for v1.4.0+):**
+   - Recent SPC storm reports — already built, needs guide/changelog entry
    - Winter weather precipitation breakdown — high seasonal value for Midwest users
-6. **Near term:** Build the PWA (manifest + service worker + icons) — one weekend
-7. **If growth warrants it:** Add Play Store distribution via TWA
-8. **If growth warrants it:** Build the push notification backend
-9. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
+9. **If growth warrants it:** Add Play Store distribution via TWA
+10. **If growth warrants it:** Build the push notification backend
+11. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
 
 ---
 
