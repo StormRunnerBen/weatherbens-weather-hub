@@ -262,17 +262,32 @@
       <input type="hidden" name="form-name" value="weather-hub-feedback">
 
       <div class="field">
-        <label for="device">Device / Browser <span class="label-hint">optional</span></label>
+        <label for="device">Device <span class="label-hint">optional</span></label>
         <select id="device" name="device">
           <option value="">— Select —</option>
-          <option>iPhone / Safari</option>
-          <option>Android / Chrome</option>
-          <option>Desktop / Chrome</option>
-          <option>Desktop / Firefox</option>
-          <option>Desktop / Safari</option>
-          <option>Desktop / Edge</option>
+          <option>iPhone</option>
+          <option>Android</option>
+          <option>PC</option>
+          <option>Mac</option>
           <option>Other</option>
         </select>
+      </div>
+
+      <div class="field">
+        <label for="browser">Browser <span class="label-hint">optional</span></label>
+        <select id="browser" name="browser" onchange="handleBrowserChange(this)">
+          <option value="">— Select —</option>
+          <option>Chrome</option>
+          <option>Edge</option>
+          <option>Firefox</option>
+          <option>Safari</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="field" id="browser-other-field" style="display:none;">
+        <label for="browser-other">Browser name <span class="label-hint">optional — helps with troubleshooting</span></label>
+        <input type="text" id="browser-other" name="browser_other" placeholder="e.g. Samsung Internet, Opera, Brave…">
       </div>
 
       <div class="field">
@@ -318,5 +333,18 @@
   </div>
 
 </div>
+<script>
+function handleBrowserChange(select) {
+  const otherField = document.getElementById('browser-other-field');
+  const otherInput = document.getElementById('browser-other');
+  if (select.value === 'Other') {
+    otherField.style.display = '';
+    otherInput.focus();
+  } else {
+    otherField.style.display = 'none';
+    otherInput.value = '';
+  }
+}
+</script>
 </body>
 </html>

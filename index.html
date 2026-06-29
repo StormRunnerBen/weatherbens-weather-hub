@@ -110,9 +110,35 @@
     transition: opacity 0.15s;
   }
   .notify-dismiss:hover { opacity: 1; }
+  /* ── Mobile font size improvements ──
+     Base bump of ~6% on html lifts all rem values proportionally.
+     Individual floor rules catch the smallest elements that were
+     dropping below comfortable reading size on phone screens. */
   @media (max-width: 600px) {
-    .notify-banner { font-size: 0.78rem; padding: 0.55rem 0.85rem; }
-    .notify-btn { padding: 0.35rem 0.6rem; font-size: 0.7rem; }
+    html { font-size: 106%; }
+
+    /* Raise the very smallest text — anything under 0.72rem gets a floor */
+    .wn-badge, .wn-version, .wn-fixes-header, .wn-section-divider-label,
+    .pp-threshold-label, .pp-hour-label, .pp-now-label,
+    .temp-trend-label, .temp-feels-label, .hour-detail-label,
+    .day-detail-label, .day-tap-hint, .day-chevron,
+    .loc-meta-label, .storm-report-time, .storm-reports-note,
+    .section-label, .divider-sub, .briefing-row-text,
+    .alert-expand-hint, .hour-time, .hour-rain,
+    .cond-label, .precip-prob-title {
+      font-size: max(0.72rem, 0.72rem) !important;
+    }
+
+    /* Body text and readable content — minimum 0.82rem */
+    .alert-item, .wn-item-desc, .wn-fix-text,
+    .day-detail-item, .loc-card-desc, .storm-report-remarks,
+    .hour-detail-value, .day-detail-value {
+      font-size: max(0.82rem, 0.82rem) !important;
+    }
+
+    /* Notify banner slightly larger on mobile for urgent readability */
+    .notify-banner { font-size: 0.85rem; padding: 0.55rem 0.85rem; }
+    .notify-btn { padding: 0.35rem 0.6rem; font-size: 0.78rem; }
   }
 
   /* ── Header ── */
@@ -4344,7 +4370,7 @@ async function loadStormReports() {
 // Bump WHATS_NEW_VERSION whenever a meaningful update ships.
 // Users who have already seen this version won't see it again
 // unless they clear localStorage or the version string changes.
-const WHATS_NEW_VERSION = 'v1.2.1';
+const WHATS_NEW_VERSION = 'v1.2.2';
 const WHATS_NEW_KEY = 'weatherbens_whats_new_seen';
 
 // Versioned changelog — newest version first, immediately preceding version second.
@@ -4366,8 +4392,22 @@ const WHATS_NEW_CHANGELOG = [
     ]
   },
   {
-    version: 'v1.2.1',
+    version: 'v1.2.2',
     label: 'Current version',
+    fixes: [
+      {
+        title: 'Mobile font sizes too small',
+        desc: 'Increased the base font size on mobile screens and set minimum size floors on the smallest text elements — labels, meta info, chart annotations — so everything is comfortable to read on a phone.'
+      },
+      {
+        title: 'Feedback form — Device/Browser field improved',
+        desc: 'Split the single Device/Browser dropdown into two separate fields. Device options: iPhone, Android, PC, Mac, Other. Browser options: Chrome, Edge, Firefox, Safari, Other — with an optional text field that appears when "Other" is selected for troubleshooting.'
+      },
+    ]
+  },
+  {
+    version: 'v1.2.1',
+    label: 'Previous release',
     fixes: [
       {
         title: 'Alerts missing county zone and forecast zone',
@@ -4490,7 +4530,7 @@ function showWhatsNew(force = false) {
           <span class="wn-fix-text"><strong>${fix.title}</strong> — ${fix.desc}</span>
         </div>`).join('')}` : '';
 
-    const dividerLabels = ['', 'COMING SOON', 'PREVIOUS RELEASE', 'EARLIER RELEASES'];
+    const dividerLabels = ['', 'COMING SOON', 'PREVIOUS RELEASE', 'PREVIOUS RELEASE', 'EARLIER RELEASES'];
     const divider = sIdx > 0 ? `
       <div class="wn-section-divider">
         <span class="wn-section-divider-label">${dividerLabels[sIdx] || 'EARLIER RELEASES'}</span>
