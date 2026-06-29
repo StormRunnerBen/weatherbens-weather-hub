@@ -2813,7 +2813,14 @@ function heatContextMsg(feelsLike) {
 }
 
 function renderCurrent(c) {
-  const [desc, icon] = wmoInfo(c.weather_code);
+  const [descRaw, iconRaw] = wmoInfo(c.weather_code);
+  // Apply the same storm guard as the 7-day cards — the current hour's WMO code
+  // can show thunderstorm even when precipitation is zero. Require actual
+  // precipitation before showing storm icon/label in current conditions.
+  const currentIsStorm = [95, 96, 99].includes(c.weather_code) && c.precipitation > 0;
+  const currentStormButDry = [95, 96, 99].includes(c.weather_code) && !currentIsStorm;
+  const desc = currentStormButDry ? 'Mostly Sunny' : descRaw;
+  const icon = currentStormButDry ? '☀️' : iconRaw;
   document.getElementById('c-temp').textContent = Math.round(c.temperature_2m);
   document.getElementById('c-feels-val').textContent = Math.round(c.apparent_temperature);
   document.getElementById('c-sky').textContent = icon + ' ' + desc;
