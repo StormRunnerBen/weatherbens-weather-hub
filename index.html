@@ -3312,7 +3312,36 @@ function renderDaily(d, h) {
           <div class="day-detail-note" style="margin-top:0.4rem;">Probabilities represent the chance of that hazard within 25 miles of a point. Source: SPC.</div>`;
       }
 
-      if (spcInfo) {
+      // ── Helper: build the context card (heat/nice day) ──
+      // Used both when SPC has no data and when SPC is General Thunder (dn=2)
+      // so heat info can appear alongside a low-end storm mention.
+      function contextCardHtml() {
+        const feelsHiVal = feelsHi !== null ? feelsHi : hiF;
+        if (feelsHiVal >= 100 || hiF >= 95) {
+          return `
+            <div class="day-context-card heat-extreme">
+              <span class="day-context-title">🌡 Extreme Heat</span>
+              <span class="day-context-body">High of ${hiF}°${feelsHi && feelsHi > hiF ? `, feeling like <strong>${feelsHi}°</strong>` : ''}. Limit outdoor activity during peak afternoon hours, stay hydrated, and check on elderly neighbors. Never leave people or pets in parked vehicles.</span>
+            </div>`;
+        } else if (feelsHiVal >= 88 || hiF >= 88) {
+          return `
+            <div class="day-context-card heat-warm">
+              <span class="day-context-title">☀ Warm Day Ahead</span>
+              <span class="day-context-body">High of ${hiF}°${feelsHi && feelsHi > hiF ? `, feeling like <strong>${feelsHi}°</strong>` : ''}. If you're spending time outside, morning hours will be most comfortable. Drink plenty of water and use sunscreen.</span>
+            </div>`;
+        } else if (rainPct < 20 && hiF <= 85) {
+          return `
+            <div class="day-context-card nice-day">
+              <span class="day-context-title">✓ Great Day to Be Outside</span>
+              <span class="day-context-body">Comfortable conditions with a high of ${hiF}° and only a ${rainPct}% chance of rain. A good day to enjoy outdoor activities.</span>
+            </div>`;
+        }
+        return ''; // mild day, no filler
+      }
+
+      if (spcInfo && spc && spc.dn >= 3) {
+        // Marginal or higher — SPC block is the primary safety message.
+        // Don't add a heat card underneath; the SPC risk is more urgent.
         const hazards = (dayOffset <= 2 && spc)
           ? hazardBarsHtml(spc.tornado || null, spc.hail || null, spc.wind || null)
           : '';
@@ -3326,38 +3355,30 @@ function renderDaily(d, h) {
             ${hazards}
             <a class="day-detail-spc-link" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.5rem;">View full SPC outlook ↗</a>
           </div>`;
+      } else if (spcInfo && spc && spc.dn === 2) {
+        // General Thunder — low-end storm mention worth showing, but heat is
+        // equally important on hot days. Show both: SPC block first, then
+        // the heat/nice day context card below it.
+        const hazards = (dayOffset <= 2 && spc)
+          ? hazardBarsHtml(spc.tornado || null, spc.hail || null, spc.wind || null)
+          : '';
+        spcHtml = `
+          <div class="day-detail-spc" style="border-left: 3px solid ${spcInfo.color}">
+            <div class="day-detail-spc-header">
+              <span class="day-detail-spc-badge" style="background:${spcInfo.color}; color:#111">${spcInfo.short}</span>
+              <span class="day-detail-spc-title">SPC ${spcInfo.name}</span>
+            </div>
+            <div class="day-detail-spc-desc">${spcInfo.desc}</div>
+            ${hazards}
+            <a class="day-detail-spc-link" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.5rem;">View full SPC outlook ↗</a>
+          </div>`;
+        spcHtml += contextCardHtml();
       } else {
-        // No SPC risk — show a context-aware card based on actual conditions
-        const feelsHiVal = feelsHi !== null ? feelsHi : hiF;
-        if (feelsHiVal >= 100 || hiF >= 95) {
-          // Extreme heat
-          const dewComfort = feelsHi ? dewPointComfort(feelsHiVal) : null;
-          spcHtml = `
-            <div class="day-context-card heat-extreme">
-              <span class="day-context-title">🌡 Extreme Heat</span>
-              <span class="day-context-body">High of ${hiF}°${feelsHi && feelsHi > hiF ? `, feeling like <strong>${feelsHi}°</strong>` : ''}. Limit outdoor activity during peak afternoon hours, stay hydrated, and check on elderly neighbors. Never leave people or pets in parked vehicles.</span>
-            </div>`;
-        } else if (feelsHiVal >= 88 || hiF >= 88) {
-          // Hot but manageable
-          spcHtml = `
-            <div class="day-context-card heat-warm">
-              <span class="day-context-title">☀ Warm Day Ahead</span>
-              <span class="day-context-body">High of ${hiF}°${feelsHi && feelsHi > hiF ? `, feeling like <strong>${feelsHi}°</strong>` : ''}. If you're spending time outside, morning hours will be most comfortable. Drink plenty of water and use sunscreen.</span>
-            </div>`;
-        } else if (rainPct < 20 && hiF <= 85) {
-          // Nice day
-          spcHtml = `
-            <div class="day-context-card nice-day">
-              <span class="day-context-title">✓ Great Day to Be Outside</span>
-              <span class="day-context-body">Comfortable conditions with a high of ${hiF}° and only a ${rainPct}% chance of rain. A good day to enjoy outdoor activities.</span>
-            </div>`;
+        // No SPC risk — show context card only
+        spcHtml = contextCardHtml();
+        if (!spcHtml && !spc && dayOffset <= 3) {
+          spcHtml = `<div class="day-detail-note">SPC outlook data unavailable — <a href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">check SPC directly ↗</a></div>`;
         }
-        // Otherwise (mild but not "nice day" threshold) show nothing — no filler
-      }
-
-      if (!spc && dayOffset <= 3 && spcInfo === null) {
-        // SPC data unavailable — small unobtrusive note only
-        if (!spcHtml) spcHtml = `<div class="day-detail-note">SPC outlook data unavailable — <a href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">check SPC directly ↗</a></div>`;
       }
 
       // Hail context — only show when rain probability supports it,
