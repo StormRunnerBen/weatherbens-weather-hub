@@ -3339,15 +3339,21 @@ function renderDaily(d, h) {
     const fmtTime  = iso => iso ? new Date(iso).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }) : '—';
 
     // ── Precipitation timing from hourly data ──
-    // Daily index i maps to hourly slice [i*24 .. (i+1)*24-1].
-    // past_days=1 prepends one day to both arrays, so the indices align directly.
+    // Match hourly entries by date string rather than using a fixed i*24 offset.
+    // The fixed offset assumes the hourly array always starts at yesterday midnight
+    // with exactly 24 hours per day, but array lengths can vary depending on when
+    // the request is made — causing the slice to land on the wrong day on some
+    // devices. Matching by date is reliable regardless of array length.
     let precipTiming = null;
-    if (h && h.precipitation_probability && h.time) {
-      const sliceStart = i * 24;
-      const sliceEnd   = Math.min(sliceStart + 24, h.precipitation_probability.length);
-      const dayProbs   = h.precipitation_probability.slice(sliceStart, sliceEnd);
-      const dayTimes   = h.time.slice(sliceStart, sliceEnd);
-      if (dayProbs.length > 0) {
+    if (h && h.precipitation_probability && h.time && d.time && d.time[i]) {
+      const targetDate = d.time[i].slice(0, 10); // e.g. "2026-07-02"
+      const dayIndices = [];
+      for (let j = 0; j < h.time.length; j++) {
+        if (h.time[j].slice(0, 10) === targetDate) dayIndices.push(j);
+      }
+      if (dayIndices.length > 0) {
+        const dayProbs  = dayIndices.map(j => h.precipitation_probability[j]);
+        const dayTimes  = dayIndices.map(j => h.time[j]);
         precipTiming = precipTimingLabel(dayProbs, dayTimes, currentLocation.timezone);
 
         // Fallback: Open-Meteo's hourly precipitation probability and daily
