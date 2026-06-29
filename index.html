@@ -3349,6 +3349,22 @@ function renderDaily(d, h) {
       const dayTimes   = h.time.slice(sliceStart, sliceEnd);
       if (dayProbs.length > 0) {
         precipTiming = precipTimingLabel(dayProbs, dayTimes, currentLocation.timezone);
+
+        // Fallback: Open-Meteo's hourly precipitation probability and daily
+        // precipitation sum come from different model outputs and can conflict.
+        // If the hourly probs say "no precipitation" but the daily sum shows
+        // meaningful rainfall expected (>0.05") or SPC has any outlook,
+        // show a general storm timing note rather than the misleading "No
+        // precipitation expected" message.
+        if (precipTiming.tier === 'none' && (
+          (dayPrecipSum !== null && dayPrecipSum > 0.05) ||
+          (spc && spc.dn >= 2)
+        )) {
+          precipTiming = {
+            label: 'Storm timing uncertain — model data is inconsistent for this day. Monitor NWS forecasts as the day approaches.',
+            tier: 'possible'
+          };
+        }
       }
     }
 
