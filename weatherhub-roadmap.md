@@ -283,14 +283,27 @@ PWA → Play Store TWA is a natural progression and relatively low-friction. App
 4. **Done:** Precipitation timing — 7-day cards show when rain is expected; 24-hour rain chances chart in Your Backyard Forecast
 5. **Done:** Feels-Like and Humidity Prominence — feels-like co-equal with actual temp; humidity card with dew point comfort level and heat safety context
 6. **Done — v1.3.0:** Navigation menu, Themes (6 options), Humidity & Heat Prominence
-7. **Done — v1.3.1 (current):** Hourly storm icon guard, Day at a Glance storm guard, theme persistence to guide/feedback pages, context-aware day cards replacing SPC No Severe Risk
-7. **Near term after v1.3.0:** Build the PWA (manifest + service worker + icons) — one weekend
-8. **Remaining near-term features (queue for v1.4.0+):**
+7. **Done — v1.3.1 (current):** Hourly storm icon guard, Day at a Glance storm guard, theme persistence to guide/feedback pages, context-aware day cards replacing SPC No Severe Risk, header star for saving locations
+8. **Target for v1.4.0:**
+   - **Expand saved locations from 3 to 6** — `MAX_FAVORITES` constant change plus responsive My Locations panel layout (see note below)
    - Recent SPC storm reports — already built, needs guide/changelog entry
    - Winter weather precipitation breakdown — high seasonal value for Midwest users
-9. **If growth warrants it:** Add Play Store distribution via TWA
-10. **If growth warrants it:** Build the push notification backend
-11. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
+9. **Near term after v1.4.0:** Build the PWA (manifest + service worker + icons) — one weekend
+10. **If growth warrants it:** Add Play Store distribution via TWA
+11. **If growth warrants it:** Build the push notification backend
+12. **Long term:** Evaluate native iOS app if the user base reaches a scale that justifies the overhead
+
+### Note: My Locations panel layout for 6 locations
+
+Expanding to 6 saved locations requires a responsive panel layout update to avoid the panel feeling too long on larger screens. Proposed breakpoints:
+
+| Screen | Panel width | Card layout |
+|--------|------------|-------------|
+| Phone (portrait + landscape) | `min(300px, 85vw)` | Single column — always |
+| iPad portrait (~768px) | `min(380px, 85vw)` | Single column — panel too narrow for two |
+| iPad landscape / desktop (≥1024px) | `min(520px, 50vw)` | Two-column card grid |
+
+The layout work should be done as part of the same v1.4.0 item — the panel should be solid at any card count before the maximum is increased. The functional change (`MAX_FAVORITES = 6`) is a one-liner; the layout update is the bulk of the work.
 
 ---
 

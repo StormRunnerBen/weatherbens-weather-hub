@@ -175,6 +175,22 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
+  .header-star {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    padding: 0 0.1rem;
+    line-height: 1;
+    transition: color 0.15s, transform 0.15s;
+    display: none; /* hidden until a location loads */
+    vertical-align: middle;
+    margin-left: 0.3rem;
+  }
+  .header-star:hover { color: var(--electric); transform: scale(1.2); }
+  .header-star.saved { color: var(--electric); display: inline; }
+  .header-star.visible { display: inline; }
   .header-time {
     font-family: var(--mono);
     font-size: 0.85rem;
@@ -2208,7 +2224,7 @@
   <header>
     <div class="brand">
       <span class="brand-name"><span class="ben">WeatherBen's</span> Weather Hub</span>
-      <span class="brand-sub" id="location-label">Search for a location</span>
+      <span class="brand-sub" id="location-label">Search for a location</span><button class="header-star" id="header-star" onclick="toggleFavorite()" aria-label="Save this location" title="Save this location">☆</button>
     </div>
     <div style="display:flex; align-items:center; gap:0.75rem;">
       <div class="header-time">
@@ -2288,7 +2304,7 @@
       <button class="lp-close" onclick="closeLocationsPanel()" aria-label="Close">✕</button>
     </div>
     <div class="lp-body" id="lp-body">
-      <div class="lp-empty"><strong>No saved locations yet.</strong>Search for a city and tap ☆ Save this location to add it here.</div>
+      <div class="lp-empty"><strong>No saved locations yet.</strong> Search for a city and tap the ☆ star next to the location name to save it here.</div>
     </div>
   </div>
 
@@ -4521,15 +4537,24 @@ function renderFavoritesRow() {
 // Updates the status line under the search bar, including the save/saved star toggle.
 function updateLocationStatus() {
   const statusEl = document.getElementById('location-status');
+  const starBtn = document.getElementById('header-star');
   if (!currentLocation) {
     statusEl.textContent = 'Enter a city and state to load weather, alerts, and radar for your area.';
+    if (starBtn) { starBtn.classList.remove('visible', 'saved'); }
     return;
   }
   const saved = isFavorited(currentLocation);
   statusEl.innerHTML =
     `Showing weather for <strong style="color:var(--text)">${currentLocation.displayName}</strong> · ` +
-    `<button class="location-reset" onclick="clearLocation()">Search a different location</button> · ` +
-    `<button class="fav-toggle${saved ? ' saved' : ''}" onclick="toggleFavorite()">${saved ? '★ Saved' : '☆ Save this location'}</button>`;
+    `<button class="location-reset" onclick="clearLocation()">Search a different location</button>`;
+
+  // Update header star
+  if (starBtn) {
+    starBtn.textContent = saved ? '★' : '☆';
+    starBtn.title = saved ? 'Saved — click to remove' : 'Save this location';
+    starBtn.classList.toggle('saved', saved);
+    starBtn.classList.add('visible');
+  }
 }
 
 function saveLastLocation(loc) {
@@ -5125,7 +5150,7 @@ async function renderLocationsPanel() {
   }).join('');
 
   if (favs.length < MAX_FAVORITES) {
-    body.innerHTML += `<div class="loc-add-hint">Save up to <strong>${MAX_FAVORITES} locations</strong>. Search a city and tap ☆ Save this location.</div>`;
+    body.innerHTML += `<div class="loc-add-hint">Save up to <strong>${MAX_FAVORITES} locations</strong>. Search a city and tap the ☆ star in the header to save it.</div>`;
   } else {
     body.innerHTML += `<div class="lp-limit-note">3 / 3 locations saved — remove one to add another.</div>`;
   }
