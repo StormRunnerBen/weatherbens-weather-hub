@@ -2835,11 +2835,13 @@ function renderDaily(d, h) {
     const spcInfo = spc && spc.dn ? SPC_RISK_INFO[spc.dn] : null;
 
     // ── Summary label: add SPC risk tag for Marginal and above only ──
-    // General Thunderstorm (dn=2) is deliberately excluded — it just means
-    // storms are possible somewhere in the broad area and isn't actionable
-    // enough to surface in the collapsed row label. Marginal (dn=3) and above
-    // are the tiers worth flagging so users know to expand for more detail.
     let displayDesc = desc;
+    // On hot days, append feels-like to the collapsed label since that's
+    // more actionable than the sky condition alone.
+    const isHotDay = hiF >= 88 || (feelsHi && feelsHi >= 95);
+    if (isHotDay && feelsHi && feelsHi > hiF && !spcInfo) {
+      displayDesc = `${desc} · Feels like ${feelsHi}°`;
+    }
     if (spcInfo && spc && spc.dn >= 3) {
       displayDesc = `${desc} · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
     } else if (isStorm && spc && spc.dn === null && dayOffset <= 3) {
@@ -2998,14 +3000,22 @@ function toggleDayCard(rowEl) {
 // Picks a phrase bank based on rain chance + weather code, then fills in
 // the actual high temp and rain % for today. A few options per bucket so
 // it doesn't feel like the exact same line every single day.
-function pickSummary(code, rainProb, highF) {
-  const isStorm = [95, 96, 99].includes(code);
+function pickSummary(code, rainProb, highF, feelsLikeHigh) {
+  // Guard isStorm with a rain probability check — Open-Meteo's daily WMO code
+  // picks the highest severity across ALL hours including low-probability nighttime
+  // cells, so a day with 10% rain chance can get coded as "Thunderstorm" if one
+  // hourly slot briefly crosses the threshold. Requiring rainProb >= 25 prevents
+  // a sunny/hot day from being mislabeled as a storm day.
+  const isStorm = [95, 96, 99].includes(code) && rainProb >= 25;
   const isSnow = [71, 73, 75, 77, 85, 86].includes(code);
   const isRain = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) || rainProb >= 50;
   const isFog = [45, 48].includes(code);
   const isOvercast = code === 3;
   const isCloudy = [1, 2].includes(code);
   const isClear = code === 0;
+  // Extreme heat — feels-like is more informative than sky conditions
+  const isExtremeHeat = highF >= 95 || (feelsLikeHigh && feelsLikeHigh >= 100);
+  const isHot = highF >= 88 || (feelsLikeHigh && feelsLikeHigh >= 95);
 
   let icon = '🌤️';
   let lines = [];
@@ -3021,6 +3031,20 @@ function pickSummary(code, rainProb, highF) {
     lines = [
       `Bundle up — snow's possible today with a high of only <span class="hl-temp">${highF}°</span>.`,
       `Time to break out the boots. Wintry weather expected, high of <span class="hl-temp">${highF}°</span>.`
+    ];
+  } else if (isExtremeHeat && !isRain) {
+    icon = '🌡️';
+    const feelsStr = feelsLikeHigh ? ` — feeling like <span class="hl-temp">${feelsLikeHigh}°</span>` : '';
+    lines = [
+      `Dangerous heat today. High of <span class="hl-temp">${highF}°</span>${feelsStr}. Stay hydrated, limit time outdoors, and check on neighbors.`,
+      `Extreme heat is the story today — high of <span class="hl-temp">${highF}°</span>${feelsStr}. Drink water and find air conditioning if possible.`
+    ];
+  } else if (isHot && !isRain) {
+    icon = highF >= 90 && (!code || isClear || isCloudy) ? '☀️' : '🌤️';
+    const feelsStr = feelsLikeHigh && feelsLikeHigh > highF ? ` but will feel like <span class="hl-temp">${feelsLikeHigh}°</span>` : '';
+    lines = [
+      `Hot one today — high of <span class="hl-temp">${highF}°</span>${feelsStr}. Stay hydrated and limit prolonged outdoor activity during peak afternoon hours.`,
+      `Sizzling out there today. High of <span class="hl-temp">${highF}°</span>${feelsStr} — sunscreen and water are your friends.`
     ];
   } else if (isRain) {
     icon = '🌧️';
@@ -3072,8 +3096,9 @@ function renderDaySummary(daily, current) {
   const lowF = Math.round(daily.temperature_2m_min[1]);
   const rainProb = daily.precipitation_probability_max[1];
   const code = daily.weather_code[1];
+  const feelsLikeHigh = daily.apparent_temperature_max ? Math.round(daily.apparent_temperature_max[1]) : null;
 
-  const { icon, line } = pickSummary(code, rainProb, highF);
+  const { icon, line } = pickSummary(code, rainProb, highF, feelsLikeHigh);
 
   document.getElementById('summary-icon').textContent = icon;
   document.getElementById('summary-headline').innerHTML = line;
@@ -4396,12 +4421,16 @@ const WHATS_NEW_CHANGELOG = [
     label: 'Current version',
     fixes: [
       {
+        title: 'Sunny/hot days incorrectly showing as thunderstorms',
+        desc: 'Open-Meteo\'s daily weather code picks the highest severity across all hours — including low-probability overnight cells — so a mostly sunny day with 10% rain could get coded as a thunderstorm. Added a 25% rain probability guard so the storm label only appears when there\'s a meaningful chance of rain. Hot days (88°F+) now lead with feels-like temperature in the Day at a Glance messaging since that\'s more actionable during extreme heat.'
+      },
+      {
         title: 'Mobile font sizes too small',
-        desc: 'Increased the base font size on mobile screens and set minimum size floors on the smallest text elements — labels, meta info, chart annotations — so everything is comfortable to read on a phone.'
+        desc: 'Increased the base font size on mobile screens and set minimum size floors on the smallest text elements so everything is comfortable to read on a phone.'
       },
       {
         title: 'Feedback form — Device/Browser field improved',
-        desc: 'Split the single Device/Browser dropdown into two separate fields. Device options: iPhone, Android, PC, Mac, Other. Browser options: Chrome, Edge, Firefox, Safari, Other — with an optional text field that appears when "Other" is selected for troubleshooting.'
+        desc: 'Split into two separate dropdowns. Device: iPhone, Android, PC, Mac, Other. Browser: Chrome, Edge, Firefox, Safari, Other — with a text field that appears when "Other" is selected.'
       },
     ]
   },
