@@ -2828,27 +2828,13 @@ function renderDaily(d, h) {
     const rainPct = d.precipitation_probability_max[i] ?? 0;
 
     // ── SPC outlook for this day (Days 1-3 only) ──
-    // dayOffset: i=1 → today = day 1, i=2 → tomorrow = day 2, i=3 → day 3
-    // Days 4+ have no SPC categorical data.
-    const dayOffset = i; // i starts at 1 (today)
+    const dayOffset = i;
     const spc = (spcOutlooks && dayOffset <= 3) ? spcOutlooks[dayOffset] : undefined;
     const spcInfo = spc && spc.dn ? SPC_RISK_INFO[spc.dn] : null;
 
-    // ── Summary label: add SPC risk tag for Marginal and above only ──
-    let displayDesc = desc;
-    // On hot days, append feels-like to the collapsed label since that's
-    // more actionable than the sky condition alone.
-    const isHotDay = hiF >= 88 || (feelsHi && feelsHi >= 95);
-    if (isHotDay && feelsHi && feelsHi > hiF && !spcInfo) {
-      displayDesc = `${desc} · Feels like ${feelsHi}°`;
-    }
-    if (spcInfo && spc && spc.dn >= 3) {
-      displayDesc = `${desc} · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
-    } else if (isStorm && spc && spc.dn === null && dayOffset <= 3) {
-      displayDesc = 'Thunderstorms · No Severe Risk';
-    }
-
-    // ── Detail panel values ──
+    // ── Detail panel values — declared here so feelsHi is available for the
+    // summary label logic below (it was previously declared after isHotDay, causing
+    // a ReferenceError that silently broke all weather data loading) ──
     const feelsHi = d.apparent_temperature_max ? Math.round(d.apparent_temperature_max[i]) : null;
     const feelsLo = d.apparent_temperature_min ? Math.round(d.apparent_temperature_min[i]) : null;
     const precipIn = d.precipitation_sum ? d.precipitation_sum[i] : null;
@@ -2858,6 +2844,18 @@ function renderDaily(d, h) {
     const gustMph  = d.wind_gusts_10m_max   ? Math.round(d.wind_gusts_10m_max[i])  : null;
     const uvMax    = d.uv_index_max         ? d.uv_index_max[i].toFixed(1)         : null;
     const sunrise  = d.sunrise ? d.sunrise[i] : null;
+
+    // ── Summary label: add SPC risk tag for Marginal and above only ──
+    let displayDesc = desc;
+    const isHotDay = hiF >= 88 || (feelsHi && feelsHi >= 95);
+    if (isHotDay && feelsHi && feelsHi > hiF && !spcInfo) {
+      displayDesc = `${desc} · Feels like ${feelsHi}°`;
+    }
+    if (spcInfo && spc && spc.dn >= 3) {
+      displayDesc = `${desc} · <span style="color:${spcInfo.color};font-weight:500;">SPC: ${spcInfo.name}</span>`;
+    } else if (isStorm && spc && spc.dn === null && dayOffset <= 3) {
+      displayDesc = 'Thunderstorms · No Severe Risk';
+    }
     const sunset   = d.sunset  ? d.sunset[i]  : null;
     const fmtTime  = iso => iso ? new Date(iso).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }) : '—';
 
@@ -4420,6 +4418,10 @@ const WHATS_NEW_CHANGELOG = [
     version: 'v1.2.2',
     label: 'Current version',
     fixes: [
+      {
+        title: 'Weather data not loading — site broken after last update',
+        desc: 'A variable (feelsHi) was referenced before it was declared in the 7-day forecast renderer, causing a ReferenceError that silently prevented all weather data from loading. Fixed by moving the declaration to before its first use.'
+      },
       {
         title: 'Sunny/hot days incorrectly showing as thunderstorms',
         desc: 'Open-Meteo\'s daily weather code picks the highest severity across all hours — including low-probability overnight cells — so a mostly sunny day with 10% rain could get coded as a thunderstorm. Added a 25% rain probability guard so the storm label only appears when there\'s a meaningful chance of rain. Hot days (88°F+) now lead with feels-like temperature in the Day at a Glance messaging since that\'s more actionable during extreme heat.'
