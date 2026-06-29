@@ -351,8 +351,7 @@ PWA → Play Store TWA is a natural progression and relatively low-friction. App
 6. **Done — v1.3.0:** Navigation menu, Themes (6 options), Humidity & Heat Prominence
 7. **Done — v1.3.1 (current):** Hourly storm icon guard, Day at a Glance storm guard, theme persistence to guide/feedback pages, context-aware day cards replacing SPC No Severe Risk, header star for saving locations
 8. **Done — v1.3.2:** Privacy policy page with CCPA and GDPR sections, linked from nav menu and all page footers
-9. **Target for v1.3.3 (next patch):**
-   - Tornado Emergency pulsing alert — purple family matching PDS, 2s medium pulse on both the notify banner and expanded alert card, clearly distinguishing Tornado Emergency from all other alert tiers
+9. **Done — v1.3.3 (current):** Tornado Emergency pulsing purple alert, Autumn Harvest theme (renamed from Deep Forest — dark walnut + woodland green + amber, clearly distinct from Radar Dark)
 8. **Target for v1.4.0:**
    - **Expand saved locations from 3 to 6** — `MAX_FAVORITES` constant change plus responsive My Locations panel layout (see note below)
    - **Glossary page** — standalone `glossary.html` accessible from the nav menu, covering: Watch vs. Warning vs. Advisory, alert tiers (Tornado Emergency → PDS → Observed → Radar Indicated), SPC risk levels (Marginal → High), SPC General Thunder, EF Scale (EF0–EF5), IBW tags (Considerable, Destructive), dew point comfort levels, precipitation probability, and feels-like temperature. Contextual ⓘ info links next to unfamiliar terms on the main page linking directly to the relevant glossary section.

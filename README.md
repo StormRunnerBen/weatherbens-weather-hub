@@ -31,7 +31,7 @@ A real-time severe weather tool built for people who take storm awareness seriou
 - **Header star** — tap ☆ next to the location name to save it instantly without navigating away
 - **My Locations** — save up to 3 locations, view current conditions (temp, high/low, rain %, wind, active alerts) for all of them at a glance, tap any card to switch
 - **Your Day at a Glance** — collapsible daily briefing with today/tomorrow forecast, next rain timing, SPC status, and a clothing suggestion — relevant any time of day, not just mornings
-- **6 themes** — Midnight Navy (default), Twilight Purple, Deep Forest, Storm Slate, Radar Dark, Desert Dusk; choice persists across the app including guide and feedback pages
+- **6 themes** — Midnight Navy (default), Twilight Purple, Autumn Harvest, Storm Slate, Radar Dark, Desert Dusk; choice persists across the app including guide and feedback pages
 - **Date and time** — live clock in the user's local timezone displayed in the header
 
 ---
@@ -130,8 +130,11 @@ Semantic versioning: `major.minor.patch`
 
 ### v1.4.0
 - Expand saved locations from 3 to 6 with responsive My Locations panel layout (single column on phone/tablet portrait, two-column grid on tablet landscape/desktop)
-- Winter weather precipitation type breakdown
-- SPC storm reports changelog and guide entry
+- Glossary page — plain-English explanations of weather terminology (Watch vs. Warning, PDS, SPC risk levels, EF Scale, IBW tags, dew point comfort, precipitation probability) with contextual info links on the main page
+- SPC storm reports guide and changelog entry (feature already built and live)
+
+### v1.5.0 (tentative)
+- Winter weather precipitation type breakdown — rain/snow/sleet proportions on days with frozen or mixed precipitation WMO codes
 
 ### PWA (before v2.0.0)
 - Web app manifest, service worker, home screen icon
